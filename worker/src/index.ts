@@ -3,6 +3,8 @@ import { WHY_HTML } from "./why.js";
 import { PRICING_HTML } from "./pricing.js";
 import { FAVICON_SVG } from "./favicon.js";
 import { WELCOME_HTML } from "./welcome.js";
+import { PRIVACY_HTML } from "./privacy.js";
+import { TERMS_HTML } from "./terms.js";
 
 interface Env {
   BUCKET: R2Bucket;
@@ -1044,6 +1046,18 @@ export default {
     if (path === "/welcome") {
       track(env, "pageview", ["/welcome"]);
       return new Response(WELCOME_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Legal
+    if (path === "/privacy") {
+      return new Response(PRIVACY_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/terms") {
+      return new Response(TERMS_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }

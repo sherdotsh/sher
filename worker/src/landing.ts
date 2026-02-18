@@ -24,7 +24,19 @@ export const LANDING_HTML = `<!DOCTYPE html>
   /* Header */
   .header{text-align:center;margin-bottom:2.5rem}
   .logo{font-size:2.8rem;font-weight:700;letter-spacing:-.03em}
-  .tagline{color:#71717a;font-size:1.1rem;margin-top:.35rem}
+  .tagline{color:#71717a;font-size:1.1rem;margin-top:.35rem;position:relative;display:inline-block}
+  .aside{
+    position:absolute;
+    right:-7.5rem;
+    top:-.25rem;
+    color:#3f3f46;
+    font-size:.7rem;
+    font-style:italic;
+    transform:rotate(-6deg);
+    white-space:nowrap;
+    pointer-events:none;
+    user-select:none;
+  }
 
   /* Terminal */
   .terminal{
@@ -141,6 +153,9 @@ export const LANDING_HTML = `<!DOCTYPE html>
   .gh-icon{width:16px;height:16px;fill:currentColor}
 
   /* Mobile */
+  @media(max-width:720px){
+    .aside{display:none}
+  }
   @media(max-width:560px){
     .logo{font-size:2.2rem}
     .terminal-body{padding:16px;font-size:.78rem;height:260px}
@@ -155,7 +170,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
 
 <div class="header">
   <div class="logo">sher</div>
-  <div class="tagline">instant preview links for your projects</div>
+  <div class="tagline">instant preview links for your projects<span class="aside">without Vercel</span></div>
 </div>
 
 <div class="terminal">
@@ -184,6 +199,8 @@ export const LANDING_HTML = `<!DOCTYPE html>
   <a href="https://github.com/sherdotsh/sher#readme" target="_blank">Docs</a>
   <a href="/why">Why?</a>
   <a href="/pricing">Pricing</a>
+  <a href="/terms">Terms</a>
+  <a href="/privacy">Privacy</a>
 </div>
 
 <script>
