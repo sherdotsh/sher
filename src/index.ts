@@ -6,6 +6,7 @@ import { collectFiles } from "./collect.js";
 import { uploadFiles } from "./upload.js";
 import { copyToClipboard } from "./clipboard.js";
 import { getAuth, login, logout } from "./auth.js";
+import { listDeploys, deleteDeploy } from "./api.js";
 import { MAX_UPLOAD_SIZE, DEFAULT_TTL, VERSION } from "./constants.js";
 
 // -- Colors --
@@ -34,6 +35,8 @@ const HELP = `
 
   ${dim("Commands:")}
     link                    Build project and get a shareable preview link
+    list                    Show your active deployments
+    delete <id>             Delete a deployment
     login                   Authenticate with GitHub
     logout                  Remove stored credentials
     whoami                  Show current login status
@@ -50,11 +53,13 @@ const HELP = `
 // -- Arg parsing --
 function parseArgs(): {
   command: string | undefined;
+  positional: string[];
   flags: Record<string, string | boolean>;
 } {
   const args = process.argv.slice(2);
   const flags: Record<string, string | boolean> = {};
   let command: string | undefined;
+  const positional: string[] = [];
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -66,7 +71,6 @@ function parseArgs(): {
     } else if (arg === "--no-build") {
       flags["no-build"] = true;
     } else if (arg === "--pass") {
-      // --pass can optionally take a value; if next arg looks like a flag or command, treat as boolean
       const next = args[i + 1];
       if (next && !next.startsWith("-") && i + 1 < args.length) {
         flags.pass = args[++i];
@@ -77,12 +81,16 @@ function parseArgs(): {
       flags.dir = args[++i];
     } else if (arg === "--ttl" && args[i + 1]) {
       flags.ttl = args[++i];
-    } else if (!arg.startsWith("-") && !command) {
-      command = arg;
+    } else if (!arg.startsWith("-")) {
+      if (!command) {
+        command = arg;
+      } else {
+        positional.push(arg);
+      }
     }
   }
 
-  return { command, flags };
+  return { command, positional, flags };
 }
 
 // -- Commands --
@@ -105,6 +113,11 @@ async function cmdLink(flags: Record<string, string | boolean>) {
   } else {
     const framework = detectFramework(cwd);
     console.log(`  ${dim("framework")}  ${framework.name}`);
+
+    if (framework.warning) {
+      console.error(`\n  ${red(framework.warning)}\n`);
+      process.exit(1);
+    }
 
     const pm = detectPackageManager(cwd);
     if (!flags["no-build"] && framework.name !== "static") {
@@ -145,12 +158,28 @@ async function cmdLink(flags: Record<string, string | boolean>) {
         : randomBytes(4).toString("hex"); // 8-char random
   }
 
-  console.log(`  ${dim("uploading")}  ...`);
   const ttlVal =
     typeof flags.ttl === "string" ? parseInt(flags.ttl, 10) : DEFAULT_TTL;
   const ttl = Math.min(Math.max(ttlVal || DEFAULT_TTL, 1), 168);
 
-  const { url, expires } = await uploadFiles(files, ttl, password);
+  const frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+  let frameIdx = 0;
+  const spinner = setInterval(() => {
+    process.stdout.write(
+      `\r  ${dim("uploading")}  ${frames[frameIdx++ % frames.length]} ${dim(formatSize(totalSize))}`
+    );
+  }, 80);
+
+  let url: string;
+  let expires: string;
+  try {
+    const result = await uploadFiles(files, ttl, password);
+    url = result.url;
+    expires = result.expires;
+  } finally {
+    clearInterval(spinner);
+    process.stdout.write("\r" + " ".repeat(60) + "\r");
+  }
 
   const copied = copyToClipboard(url);
   console.log(`\n  ${green(bold(url))}${copied ? dim("  (copied)") : ""}`);
@@ -200,9 +229,44 @@ function cmdWhoami() {
   }
 }
 
+async function cmdList() {
+  const deploys = await listDeploys();
+
+  console.log(`\n  ${bold("sher")} ${dim("— your deployments")}\n`);
+
+  if (deploys.length === 0) {
+    console.log(`  ${dim("No active deployments.")}\n`);
+    return;
+  }
+
+  for (const d of deploys) {
+    const expires = new Date(d.expiresAt);
+    const remaining = expires.getTime() - Date.now();
+    const hours = Math.max(0, Math.floor(remaining / 3600000));
+    const mins = Math.max(0, Math.floor((remaining % 3600000) / 60000));
+    const timeLeft =
+      hours > 0 ? `${hours}h ${mins}m left` : `${mins}m left`;
+
+    console.log(
+      `  ${green(bold(d.url))}  ${dim(timeLeft)}${d.hasPassword ? dim("  🔒") : ""}`
+    );
+  }
+  console.log();
+}
+
+async function cmdDelete(id: string) {
+  if (!id) {
+    console.error(`\n  ${red("Usage: sher delete <id>")}\n`);
+    process.exit(1);
+  }
+
+  await deleteDeploy(id);
+  console.log(`\n  ${dim("Deleted")} ${bold(id)}\n`);
+}
+
 // -- Main --
 async function main() {
-  const { command, flags } = parseArgs();
+  const { command, positional, flags } = parseArgs();
 
   if (flags.help || (!command && !flags.version)) {
     console.log(HELP);
@@ -217,6 +281,14 @@ async function main() {
   switch (command) {
     case "link":
       await cmdLink(flags);
+      break;
+    case "list":
+    case "ls":
+      await cmdList();
+      break;
+    case "delete":
+    case "rm":
+      await cmdDelete(positional[0]);
       break;
     case "login":
       await cmdLogin();

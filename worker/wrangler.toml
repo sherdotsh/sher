@@ -2,6 +2,8 @@ name = "sher-worker"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
+[triggers]
+crons = ["0 */6 * * *"]
 
 [[r2_buckets]]
 binding = "BUCKET"

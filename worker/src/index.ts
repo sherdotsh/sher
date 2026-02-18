@@ -11,7 +11,7 @@ interface Env {
 
 // --- Tiers ---
 const TIERS = {
-  anon: { maxUploads: 3, maxSizeBytes: 10 * 1024 * 1024, maxTTLHours: 1 },
+  anon: { maxUploads: 5, maxSizeBytes: 10 * 1024 * 1024, maxTTLHours: 24 },
   auth: { maxUploads: 50, maxSizeBytes: 50 * 1024 * 1024, maxTTLHours: 168 },
 };
 
@@ -281,6 +281,30 @@ async function handleUpload(
     })
   );
 
+  // Index deployment in KV for list/delete/cleanup
+  const deployMeta = {
+    id,
+    url: `${origin}/${id}`,
+    createdAt: new Date().toISOString(),
+    expiresAt,
+    fileCount: fileEntries.length,
+    userId: auth.userId ?? null,
+    username: auth.username ?? null,
+    hasPassword: !!passwordHash,
+  };
+  uploads.push(
+    env.KV.put(`deploy:${id}`, JSON.stringify(deployMeta), {
+      expiration: Math.floor(new Date(expiresAt).getTime() / 1000) + 3600,
+    })
+  );
+  if (auth.userId) {
+    uploads.push(
+      env.KV.put(`user:${auth.userId}:deploy:${id}`, "", {
+        expiration: Math.floor(new Date(expiresAt).getTime() / 1000) + 3600,
+      })
+    );
+  }
+
   await Promise.all(uploads);
 
   const url = `${origin}/${id}`;
@@ -506,11 +530,13 @@ async function handleAuthCallback(
     return new Response("Failed to fetch GitHub user info.", { status: 500 });
   }
 
-  // Generate a sher token and store it
+  // Generate a sher token and store it (expires in 30 days)
   const sherToken = generateId(32);
+  const TOKEN_TTL_SECONDS = 30 * 24 * 3600;
   await env.KV.put(
     `token:${sherToken}`,
-    JSON.stringify({ userId: String(user.id), username: user.login })
+    JSON.stringify({ userId: String(user.id), username: user.login }),
+    { expirationTtl: TOKEN_TTL_SECONDS }
   );
 
   // Clean up state
@@ -524,8 +550,116 @@ async function handleAuthCallback(
   return Response.redirect(callbackUrl.toString(), 302);
 }
 
+// --- List deployments ---
+async function handleListDeploys(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  const auth = await resolveAuth(env, request);
+  if (!auth.authenticated || !auth.userId) {
+    return errorResponse(401, "UNAUTHENTICATED", "Login required.");
+  }
+
+  const list = await env.KV.list({ prefix: `user:${auth.userId}:deploy:` });
+  const deploys: Record<string, unknown>[] = [];
+
+  for (const key of list.keys) {
+    const id = key.name.split(":").pop()!;
+    const raw = await env.KV.get(`deploy:${id}`);
+    if (raw) {
+      const meta = JSON.parse(raw);
+      if (new Date(meta.expiresAt) > new Date()) {
+        deploys.push(meta);
+      }
+    }
+  }
+
+  return Response.json({ deployments: deploys });
+}
+
+// --- Delete deployment ---
+async function handleDeleteDeploy(
+  request: Request,
+  env: Env,
+  id: string
+): Promise<Response> {
+  const auth = await resolveAuth(env, request);
+  if (!auth.authenticated || !auth.userId) {
+    return errorResponse(401, "UNAUTHENTICATED", "Login required.");
+  }
+
+  const raw = await env.KV.get(`deploy:${id}`);
+  if (!raw) {
+    return errorResponse(404, "NOT_FOUND", "Deployment not found.");
+  }
+
+  const meta = JSON.parse(raw);
+  if (meta.userId !== auth.userId) {
+    return errorResponse(403, "FORBIDDEN", "Not your deployment.");
+  }
+
+  // Delete all R2 objects for this deployment
+  const prefix = `sites/${id}/`;
+  let cursor: string | undefined;
+  do {
+    const listed = await env.BUCKET.list({ prefix, cursor });
+    if (listed.objects.length > 0) {
+      await env.BUCKET.delete(listed.objects.map((o) => o.key));
+    }
+    cursor = listed.truncated ? listed.cursor : undefined;
+  } while (cursor);
+
+  // Clean up KV
+  await env.KV.delete(`deploy:${id}`);
+  await env.KV.delete(`user:${auth.userId}:deploy:${id}`);
+
+  return Response.json({ deleted: true, id });
+}
+
+// --- Scheduled cleanup of expired deployments ---
+async function handleScheduled(env: Env): Promise<void> {
+  let cursor: string | undefined;
+  do {
+    const listed = await env.KV.list({ prefix: "deploy:", cursor });
+    for (const key of listed.keys) {
+      if (key.name.includes(":deploy:")) continue; // skip user index keys
+      const raw = await env.KV.get(key.name);
+      if (!raw) continue;
+
+      const meta = JSON.parse(raw);
+      if (new Date(meta.expiresAt) >= new Date()) continue;
+
+      // Expired — delete R2 objects
+      const id = meta.id;
+      const r2Prefix = `sites/${id}/`;
+      let r2Cursor: string | undefined;
+      do {
+        const r2List = await env.BUCKET.list({
+          prefix: r2Prefix,
+          cursor: r2Cursor,
+        });
+        if (r2List.objects.length > 0) {
+          await env.BUCKET.delete(r2List.objects.map((o) => o.key));
+        }
+        r2Cursor = r2List.truncated ? r2List.cursor : undefined;
+      } while (r2Cursor);
+
+      // Clean up KV
+      await env.KV.delete(key.name);
+      if (meta.userId) {
+        await env.KV.delete(`user:${meta.userId}:deploy:${id}`);
+      }
+    }
+    cursor = listed.truncated ? listed.cursor : undefined;
+  } while (cursor);
+}
+
 // --- Main router ---
 export default {
+  async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
+    await handleScheduled(env);
+  },
+
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
@@ -536,7 +670,7 @@ export default {
       return new Response(null, {
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+          "Access-Control-Allow-Methods": "POST, GET, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
       });
@@ -545,6 +679,21 @@ export default {
     // Upload
     if (path === "/api/upload" && request.method === "POST") {
       const res = await handleUpload(request, env, origin);
+      res.headers.set("Access-Control-Allow-Origin", "*");
+      return res;
+    }
+
+    // List deployments
+    if (path === "/api/deployments" && request.method === "GET") {
+      const res = await handleListDeploys(request, env);
+      res.headers.set("Access-Control-Allow-Origin", "*");
+      return res;
+    }
+
+    // Delete deployment
+    const deleteMatch = path.match(/^\/api\/deployments\/([a-z0-9]{8})$/);
+    if (deleteMatch && request.method === "DELETE") {
+      const res = await handleDeleteDeploy(request, env, deleteMatch[1]);
       res.headers.set("Access-Control-Allow-Origin", "*");
       return res;
     }
