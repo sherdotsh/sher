@@ -26,7 +26,7 @@
     "url": "https://github.com/sherdotsh/sher"
   },
   "homepage": "https://sher.sh",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "devDependencies": {
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",

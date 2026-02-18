@@ -5,13 +5,18 @@
   <p>Instant preview links for your projects.</p>
 
   <a href="https://www.npmjs.com/package/shersh"><img src="https://img.shields.io/npm/v/shersh?color=22c55e&label=npm" alt="npm version"></a>
-  <a href="https://github.com/sherdotsh/sher/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
+  <a href="https://github.com/sherdotsh/sher/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPLv3-blue" alt="License"></a>
   <a href="https://github.com/sherdotsh/sher/issues"><img src="https://img.shields.io/github/issues/sherdotsh/sher" alt="Issues"></a>
+  <img src="https://img.shields.io/badge/status-beta-orange" alt="Beta">
 
-  <br/><br/>
+  <br/>
 
-  <a href="https://sher.sh">Website</a> · <a href="https://sher.sh/why">Why?</a> · <a href="https://sher.sh/pricing">Pricing</a> · <a href="https://github.com/sherdotsh/sher/issues/new">Report Bug</a>
+  <a href="https://sher.sh">Website</a> · <a href="https://sher.sh/why">Why?</a> · <a href="https://sher.sh/pricing">Pricing</a> · <a href="https://sher.sh/blog">Blog</a> · <a href="https://github.com/sherdotsh/sher/issues/new">Report Bug</a>
 </div>
+
+---
+
+Sharing your work in progress shouldn't require setting up a Vercel project or pushing to a branch for a preview deploy. **sher** is a CLI that builds your frontend project and gives you a live preview URL in seconds, so you can just send a link instead. It works with Vite, Next.js, Astro, and anything else that produces static output. It's also a great fit for AI coding agents that need to deploy what they build and hand you a live URL. Install the [agent skill](https://sher.sh/blog/agents) with `npx skills add sherdotsh/sher`.
 
 ---
 
@@ -77,7 +82,7 @@ sher upgrade    # Upgrade to Pro ($8/mo)
 sher auto-detects your project and runs the right build command.
 
 - Vite (React, Vue, Svelte, etc.)
-- Next.js (static export — auto-configured)
+- Next.js (static export, auto-configured)
 - Astro
 - Create React App
 - Any project with a `build` script and a `dist/`, `build/`, or `out/` directory
@@ -128,4 +133,4 @@ sher link
 
 ## License
 
-MIT
+AGPLv3
