@@ -67,6 +67,19 @@ export const PRICING_HTML = `<!DOCTYPE html>
   .action-free:hover{background:#27272a;color:#fafafa}
   .action-pro{background:#fafafa;color:#09090b;border:1px solid #fafafa}
   .action-pro:hover{background:#e4e4e7}
+  .pro-cta{
+    margin-top:1.25rem;
+    background:#fafafa;
+    border-radius:8px;
+    padding:.6rem;
+    text-align:center;
+  }
+  .pro-cta code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:.85rem;
+    font-weight:600;
+    color:#09090b;
+  }
   @media(max-width:640px){
     .grid{grid-template-columns:1fr}
   }
@@ -112,7 +125,9 @@ export const PRICING_HTML = `<!DOCTYPE html>
         <li>100MB max</li>
         <li>Password-protected links</li>
       </ul>
-      <a href="#" class="card-action action-pro" id="pro-btn">Get Pro</a>
+      <div class="pro-cta">
+        <code>sher upgrade</code>
+      </div>
     </div>
   </div>
 </div>

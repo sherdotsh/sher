@@ -36,7 +36,7 @@ function saveAuth(auth: AuthConfig): void {
   writeFileSync(AUTH_FILE, JSON.stringify(auth, null, 2));
 }
 
-function openBrowser(url: string): void {
+export function openBrowser(url: string): void {
   const cmd: Record<string, [string, string[]]> = {
     darwin: ["open", [url]],
     linux: ["xdg-open", [url]],

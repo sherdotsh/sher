@@ -8,13 +8,19 @@ interface Env {
   KV: KVNamespace;
   GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
+  POLAR_WEBHOOK_SECRET: string;
+  POLAR_ACCESS_TOKEN: string;
+  POLAR_PRO_PRODUCT_ID: string;
 }
 
 // --- Tiers ---
 const TIERS = {
-  anon: { maxUploads: 5, maxSizeBytes: 10 * 1024 * 1024, maxTTLHours: 24 },
-  auth: { maxUploads: 50, maxSizeBytes: 50 * 1024 * 1024, maxTTLHours: 168 },
+  anon: { maxUploads: 1, maxSizeBytes: 10 * 1024 * 1024, maxTTLHours: 6, canPassword: false },
+  auth: { maxUploads: 25, maxSizeBytes: 50 * 1024 * 1024, maxTTLHours: 24, canPassword: false },
+  pro: { maxUploads: 200, maxSizeBytes: 100 * 1024 * 1024, maxTTLHours: 168, canPassword: true },
 };
+
+type TierName = keyof typeof TIERS;
 
 // --- MIME types ---
 const MIME_TYPES: Record<string, string> = {
@@ -75,18 +81,34 @@ interface UserData {
   username: string;
 }
 
-async function resolveAuth(
-  env: Env,
-  request: Request
-): Promise<{ authenticated: boolean; userId?: string; username?: string }> {
+interface SubData {
+  status: "active" | "canceled" | "revoked";
+  polarSubId: string;
+}
+
+interface AuthResult {
+  authenticated: boolean;
+  userId?: string;
+  username?: string;
+  tier: TierName;
+}
+
+async function resolveAuth(env: Env, request: Request): Promise<AuthResult> {
   const header = request.headers.get("Authorization");
-  if (!header?.startsWith("Bearer ")) return { authenticated: false };
+  if (!header?.startsWith("Bearer ")) return { authenticated: false, tier: "anon" };
 
   const token = header.slice(7);
   const userData = await env.KV.get<UserData>(`token:${token}`, "json");
-  if (!userData) return { authenticated: false };
+  if (!userData) return { authenticated: false, tier: "anon" };
 
-  return { authenticated: true, ...userData };
+  const sub = await env.KV.get<SubData>(`sub:${userData.userId}`, "json");
+  const isPro = sub && (sub.status === "active" || sub.status === "canceled");
+
+  return {
+    authenticated: true,
+    ...userData,
+    tier: isPro ? "pro" : "auth",
+  };
 }
 
 // --- Rate limiting via KV ---
@@ -138,24 +160,30 @@ async function handleUpload(
   origin: string
 ): Promise<Response> {
   const auth = await resolveAuth(env, request);
-  const tier = auth.authenticated ? TIERS.auth : TIERS.anon;
+  const tier = TIERS[auth.tier];
 
   // Rate limit
   const rateLimitKey = auth.authenticated
     ? `user:${auth.userId}`
     : `ip:${request.headers.get("CF-Connecting-IP") ?? "unknown"}`;
 
+  const upgradeHint = auth.tier === "anon"
+    ? `Run \`sher login\` for up to ${TIERS.auth.maxUploads}/day.`
+    : auth.tier === "auth"
+      ? `Run \`sher upgrade\` for up to ${TIERS.pro.maxUploads}/day.`
+      : "";
+
   const rateCheck = await checkRateLimit(env, rateLimitKey, tier.maxUploads);
   if (!rateCheck.allowed) {
-    const message = auth.authenticated
-      ? `Daily upload limit reached (${tier.maxUploads}/day). Resets at midnight UTC.`
-      : `Rate limit reached (${tier.maxUploads}/day). Run \`sher login\` for up to ${TIERS.auth.maxUploads}/day.`;
+    const message = upgradeHint
+      ? `Rate limit reached (${tier.maxUploads}/day). ${upgradeHint}`
+      : `Daily upload limit reached (${tier.maxUploads}/day). Resets at midnight UTC.`;
 
     return errorResponse(429, "RATE_LIMIT", message, {
       limit: rateCheck.limit,
       used: rateCheck.used,
       resetsAt: rateCheck.resetsAt,
-      authenticated: auth.authenticated,
+      tier: auth.tier,
     });
   }
 
@@ -165,15 +193,19 @@ async function handleUpload(
     10
   );
   if (contentLength > tier.maxSizeBytes * 1.4) {
-    // 1.4x for base64 overhead
     const maxMB = tier.maxSizeBytes / 1024 / 1024;
-    const message = auth.authenticated
-      ? `Upload too large (max ${maxMB}MB).`
-      : `Upload too large (max ${maxMB}MB). Run \`sher login\` for up to ${TIERS.auth.maxSizeBytes / 1024 / 1024}MB.`;
+    const sizeHint = auth.tier === "anon"
+      ? `Run \`sher login\` for up to ${TIERS.auth.maxSizeBytes / 1024 / 1024}MB.`
+      : auth.tier === "auth"
+        ? `Run \`sher upgrade\` for up to ${TIERS.pro.maxSizeBytes / 1024 / 1024}MB.`
+        : "";
+    const message = sizeHint
+      ? `Upload too large (max ${maxMB}MB). ${sizeHint}`
+      : `Upload too large (max ${maxMB}MB).`;
 
     return errorResponse(413, "UPLOAD_TOO_LARGE", message, {
       maxBytes: tier.maxSizeBytes,
-      authenticated: auth.authenticated,
+      tier: auth.tier,
     });
   }
 
@@ -221,6 +253,14 @@ async function handleUpload(
     );
   }
 
+  // Gate password behind pro tier
+  if (payload.password && !tier.canPassword) {
+    const msg = auth.authenticated
+      ? "Password-protected links require Pro. Run `sher upgrade`."
+      : "Password-protected links require Pro. Run `sher login` then `sher upgrade`.";
+    return errorResponse(403, "PRO_REQUIRED", msg, { tier: auth.tier });
+  }
+
   // Validate actual decoded size
   let totalDecodedSize = 0;
   for (const [, b64] of fileEntries) {
@@ -229,14 +269,19 @@ async function handleUpload(
   if (totalDecodedSize > tier.maxSizeBytes) {
     const maxMB = tier.maxSizeBytes / 1024 / 1024;
     const actualMB = (totalDecodedSize / 1024 / 1024).toFixed(1);
-    const message = auth.authenticated
-      ? `Upload is ${actualMB}MB (max ${maxMB}MB).`
-      : `Upload is ${actualMB}MB (max ${maxMB}MB). Run \`sher login\` for up to ${TIERS.auth.maxSizeBytes / 1024 / 1024}MB.`;
+    const sizeHint = auth.tier === "anon"
+      ? `Run \`sher login\` for up to ${TIERS.auth.maxSizeBytes / 1024 / 1024}MB.`
+      : auth.tier === "auth"
+        ? `Run \`sher upgrade\` for up to ${TIERS.pro.maxSizeBytes / 1024 / 1024}MB.`
+        : "";
+    const message = sizeHint
+      ? `Upload is ${actualMB}MB (max ${maxMB}MB). ${sizeHint}`
+      : `Upload is ${actualMB}MB (max ${maxMB}MB).`;
 
     return errorResponse(413, "UPLOAD_TOO_LARGE", message, {
       maxBytes: tier.maxSizeBytes,
       actualBytes: totalDecodedSize,
-      authenticated: auth.authenticated,
+      tier: auth.tier,
     });
   }
 
@@ -661,6 +706,157 @@ async function handleScheduled(env: Env): Promise<void> {
   } while (cursor);
 }
 
+// --- Standard Webhooks signature verification ---
+async function verifyWebhookSignature(
+  body: string,
+  headers: Headers,
+  secret: string
+): Promise<boolean> {
+  const msgId = headers.get("webhook-id");
+  const timestamp = headers.get("webhook-timestamp");
+  const signatures = headers.get("webhook-signature");
+
+  if (!msgId || !timestamp || !signatures) return false;
+
+  // Reject timestamps older than 5 minutes
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - parseInt(timestamp, 10)) > 300) return false;
+
+  // Secret format: "whsec_<base64>" — strip the prefix
+  const rawSecret = secret.startsWith("whsec_") ? secret.slice(6) : secret;
+  const keyBytes = Uint8Array.from(atob(rawSecret), (c) => c.charCodeAt(0));
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyBytes,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const toSign = new TextEncoder().encode(`${msgId}.${timestamp}.${body}`);
+  const signatureBytes = new Uint8Array(await crypto.subtle.sign("HMAC", key, toSign));
+  const expected = btoa(String.fromCharCode(...signatureBytes));
+
+  // Signatures header can have multiple space-separated values like "v1,<base64>"
+  for (const sig of signatures.split(" ")) {
+    const [, val] = sig.split(",", 2);
+    if (val === expected) return true;
+  }
+  return false;
+}
+
+// --- Polar webhook handler ---
+async function handlePolarWebhook(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  const body = await request.text();
+
+  const valid = await verifyWebhookSignature(body, request.headers, env.POLAR_WEBHOOK_SECRET);
+  if (!valid) {
+    return errorResponse(403, "INVALID_SIGNATURE", "Webhook signature verification failed.");
+  }
+
+  let event: { type: string; data: Record<string, unknown> };
+  try {
+    event = JSON.parse(body);
+  } catch {
+    return errorResponse(400, "INVALID_PAYLOAD", "Invalid JSON body.");
+  }
+
+  const subscription = event.data as {
+    id?: string;
+    status?: string;
+    metadata?: Record<string, string>;
+  };
+
+  const userId = subscription.metadata?.sher_user_id;
+  if (!userId) {
+    // No sher user linked — acknowledge but skip
+    return new Response("OK", { status: 200 });
+  }
+
+  const polarSubId = subscription.id ?? "unknown";
+  const kvKey = `sub:${userId}`;
+
+  switch (event.type) {
+    case "subscription.created":
+    case "subscription.active":
+    case "subscription.uncanceled":
+      await env.KV.put(kvKey, JSON.stringify({ status: "active", polarSubId }));
+      break;
+    case "subscription.canceled":
+      await env.KV.put(kvKey, JSON.stringify({ status: "canceled", polarSubId }));
+      break;
+    case "subscription.revoked":
+      await env.KV.delete(kvKey);
+      break;
+  }
+
+  return new Response("OK", { status: 200 });
+}
+
+// --- Checkout session creation ---
+async function handleCreateCheckout(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  const auth = await resolveAuth(env, request);
+  if (!auth.authenticated || !auth.userId) {
+    return errorResponse(401, "UNAUTHENTICATED", "Login required. Run `sher login` first.");
+  }
+
+  if (auth.tier === "pro") {
+    return errorResponse(400, "ALREADY_PRO", "You already have a Pro subscription.");
+  }
+
+  const res = await fetch("https://api.polar.sh/v1/checkouts/custom/", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.POLAR_ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      product_id: env.POLAR_PRO_PRODUCT_ID,
+      metadata: {
+        sher_user_id: auth.userId,
+        sher_username: auth.username,
+      },
+      success_url: "https://sher.sh/pricing?upgraded=1",
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    return errorResponse(502, "POLAR_ERROR", `Failed to create checkout session: ${err}`);
+  }
+
+  const data = (await res.json()) as { url?: string };
+  if (!data.url) {
+    return errorResponse(502, "POLAR_ERROR", "Polar did not return a checkout URL.");
+  }
+
+  return Response.json({ url: data.url });
+}
+
+// --- Subscription status ---
+async function handleSubscriptionStatus(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  const auth = await resolveAuth(env, request);
+  if (!auth.authenticated || !auth.userId) {
+    return errorResponse(401, "UNAUTHENTICATED", "Login required.");
+  }
+
+  const sub = await env.KV.get<SubData>(`sub:${auth.userId}`, "json");
+  return Response.json({
+    tier: auth.tier,
+    subscription: sub ? { status: sub.status, polarSubId: sub.polarSubId } : null,
+  });
+}
+
 // --- Main router ---
 export default {
   async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
@@ -722,6 +918,25 @@ export default {
     const deleteMatch = path.match(/^\/api\/deployments\/([a-z0-9]{8})$/);
     if (deleteMatch && request.method === "DELETE") {
       const res = await handleDeleteDeploy(request, env, deleteMatch[1]);
+      res.headers.set("Access-Control-Allow-Origin", "*");
+      return res;
+    }
+
+    // Polar webhook (no CORS — called by Polar servers)
+    if (path === "/api/webhooks/polar" && request.method === "POST") {
+      return handlePolarWebhook(request, env);
+    }
+
+    // Create checkout session
+    if (path === "/api/checkout" && request.method === "POST") {
+      const res = await handleCreateCheckout(request, env);
+      res.headers.set("Access-Control-Allow-Origin", "*");
+      return res;
+    }
+
+    // Subscription status
+    if (path === "/api/subscription" && request.method === "GET") {
+      const res = await handleSubscriptionStatus(request, env);
       res.headers.set("Access-Control-Allow-Origin", "*");
       return res;
     }
