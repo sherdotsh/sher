@@ -445,7 +445,13 @@ async function handleServe(
     return new Response("Not found", { status: 404 });
   }
 
-  const meta = (await metaObj.json()) as DeployMeta;
+  let meta: DeployMeta;
+  try {
+    meta = (await metaObj.json()) as DeployMeta;
+  } catch {
+    return new Response("Not found", { status: 404 });
+  }
+
   if (new Date(meta.expiresAt) < new Date()) {
     return new Response("This preview has expired.", { status: 410 });
   }
@@ -462,7 +468,11 @@ async function handleServe(
     }
   }
 
-  const resolvedPath = filePath || "index.html";
+  // Sanitize path to prevent traversal attacks
+  if (filePath.includes("..") || filePath.includes("\\")) {
+    return new Response("Invalid path", { status: 400 });
+  }
+  const resolvedPath = filePath.split("/").filter((p) => p && p !== ".").join("/") || "index.html";
   const key = `${prefix}/${resolvedPath}`;
 
   let object = await env.BUCKET.get(key);
@@ -498,7 +508,12 @@ async function handleUnlock(
     return new Response("Not found", { status: 404 });
   }
 
-  const meta = (await metaObj.json()) as DeployMeta;
+  let meta: DeployMeta;
+  try {
+    meta = (await metaObj.json()) as DeployMeta;
+  } catch {
+    return new Response("Not found", { status: 404 });
+  }
 
   const formData = await request.formData();
   const password = formData.get("password") as string;
