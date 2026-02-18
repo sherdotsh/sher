@@ -71,19 +71,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
   .header{text-align:center;margin-bottom:2.5rem}
   .logo{font-size:2.8rem;font-weight:700;letter-spacing:-.03em}
   .beta{font-size:.55rem;color:#f97316;border:1px solid #f9731640;padding:2px 6px;border-radius:9999px;font-weight:500;letter-spacing:.03em;text-transform:uppercase;vertical-align:baseline;margin-left:.15rem}
-  .tagline{color:#71717a;font-size:1.1rem;margin-top:.35rem;position:relative;display:inline-block}
-  .aside{
-    position:absolute;
-    right:-6.5rem;
-    top:.15rem;
-    color:#3f3f46;
-    font-size:.7rem;
-    font-style:italic;
-    transform:rotate(-8deg);
-    white-space:nowrap;
-    pointer-events:none;
-    user-select:none;
-  }
+  .tagline{color:#71717a;font-size:.95rem;margin-top:.5rem;line-height:1.6}
 
   /* Terminal */
   .terminal{
@@ -227,7 +215,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
 
 <div class="header">
   <div class="logo">sher <span class="beta">beta</span></div>
-  <div class="tagline">instant preview links for your projects<span class="aside">without Vercel</span></div>
+  <div class="tagline">Get a live preview URL in seconds, no Vercel or GitHub repo needed.<br>Your AI agent builds it, sher links it.</div>
 </div>
 
 <div class="terminal">
