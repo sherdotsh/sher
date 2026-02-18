@@ -45,8 +45,68 @@ export const BLOG_HTML = `<!DOCTYPE html>
   <a href="/" class="back">&larr; sher.sh</a>
   <h1>Blog</h1>
 
+  <a href="/blog/replace-vercel-previews" class="post">
+    <div class="post-title">I Replaced Vercel Preview Deploys with One CLI Command</div>
+    <div class="post-desc">How I stopped using Vercel preview deployments for quick shares and switched to a single CLI command.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/claude-code-deploy" class="post">
+    <div class="post-title">Build and Deploy a Site with Claude Code in Under a Minute</div>
+    <div class="post-desc">Use Claude Code to scaffold, build, and deploy a frontend project to a live URL. Step-by-step guide.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/openclaw-deploy" class="post">
+    <div class="post-title">Set Up OpenClaw to Build and Deploy Frontend Projects</div>
+    <div class="post-desc">Configure OpenClaw to build frontend projects and deploy them to live preview URLs automatically.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/share-localhost" class="post">
+    <div class="post-title">How to Share a Localhost Project with a Link</div>
+    <div class="post-desc">Share your local frontend project with anyone using a single CLI command. No deploy pipeline needed.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/without-vercel" class="post">
+    <div class="post-title">How to Deploy a Frontend Without Vercel or GitHub</div>
+    <div class="post-desc">Deploy your frontend project to a live URL without any platform account. One command, instant preview link.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/share-nextjs" class="post">
+    <div class="post-title">How to Share a Next.js Project Without Pushing to GitHub</div>
+    <div class="post-desc">Share your Next.js project with a live preview URL without pushing to GitHub or setting up Vercel.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/fastest-preview-url" class="post">
+    <div class="post-title">The Fastest Way to Get a Preview URL for Any Frontend Project</div>
+    <div class="post-desc">Get a live preview URL for your frontend project in seconds. Auto-detects frameworks, no config needed.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/surge-vs-vercel-vs-sher" class="post">
+    <div class="post-title">surge.sh vs Vercel vs sher: Quick Frontend Preview Comparison</div>
+    <div class="post-desc">Comparing surge.sh, Vercel, and sher for sharing quick frontend previews. When to use each tool.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/ai-agent-deploy" class="post">
+    <div class="post-title">How to Give Your AI Coding Agent a Deploy Command</div>
+    <div class="post-desc">Teach your AI coding agent to deploy frontend projects. Works with Claude Code, Cursor, and 35+ agents.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
+  <a href="/blog/agent-deploy-step" class="post">
+    <div class="post-title">Why Your AI Agent Workflow Needs a Deploy Step</div>
+    <div class="post-desc">AI agents can write code, but the loop isn't closed until you can see the result. Here's how to fix that.</div>
+    <div class="post-date">February 2026</div>
+  </a>
+
   <a href="/blog/agents" class="post">
-    <div class="post-title">Get your AI agents to build & deploy</div>
+    <div class="post-title">Get your AI agents to build &amp; deploy</div>
     <div class="post-desc">Your agent writes the code. sher gives it a URL. The loop is finally closed.</div>
     <div class="post-date">February 2026</div>
   </a>

@@ -7,6 +7,16 @@ import { PRIVACY_HTML } from "./privacy.js";
 import { TERMS_HTML } from "./terms.js";
 import { BLOG_HTML } from "./blog.js";
 import { BLOG_AGENTS_HTML } from "./blog-agents.js";
+import { BLOG_SHARE_LOCALHOST_HTML } from "./blog-share-localhost.js";
+import { BLOG_WITHOUT_VERCEL_HTML } from "./blog-without-vercel.js";
+import { BLOG_AI_AGENT_DEPLOY_HTML } from "./blog-ai-agent-deploy.js";
+import { BLOG_FASTEST_PREVIEW_URL_HTML } from "./blog-fastest-preview-url.js";
+import { BLOG_SURGE_VS_VERCEL_VS_SHER_HTML } from "./blog-surge-vs-vercel-vs-sher.js";
+import { BLOG_CLAUDE_CODE_DEPLOY_HTML } from "./blog-claude-code-deploy.js";
+import { BLOG_AGENT_DEPLOY_STEP_HTML } from "./blog-agent-deploy-step.js";
+import { BLOG_SHARE_NEXTJS_HTML } from "./blog-share-nextjs.js";
+import { BLOG_REPLACE_VERCEL_PREVIEWS_HTML } from "./blog-replace-vercel-previews.js";
+import { BLOG_OPENCLAW_DEPLOY_HTML } from "./blog-openclaw-deploy.js";
 
 interface Env {
   BUCKET: R2Bucket;
@@ -1074,12 +1084,31 @@ export default {
       });
     }
     if (path === "/sitemap.xml") {
-      const pages = ["/", "/why", "/pricing", "/privacy", "/terms", "/blog", "/blog/agents"];
+      const pages = ["/", "/why", "/pricing", "/privacy", "/terms", "/blog", "/blog/agents", "/blog/share-localhost", "/blog/without-vercel", "/blog/ai-agent-deploy", "/blog/fastest-preview-url", "/blog/surge-vs-vercel-vs-sher", "/blog/claude-code-deploy", "/blog/agent-deploy-step", "/blog/share-nextjs", "/blog/replace-vercel-previews", "/blog/openclaw-deploy"];
       const urls = pages.map((p) => `<url><loc>https://sher.sh${p}</loc></url>`).join("");
       return new Response(
         `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`,
         { headers: { "Content-Type": "application/xml" } }
       );
+    }
+
+    // Shell runner (curl one-liner)
+    if (path === "/run") {
+      track(env, "pageview", ["/run"]);
+      const script = `#!/bin/sh
+set -e
+if command -v npx >/dev/null 2>&1; then
+  exec npx -y shersh "$@"
+elif command -v pkgx >/dev/null 2>&1; then
+  exec pkgx npx -y shersh "$@"
+else
+  echo "sher: npx not found. Install Node.js or run: curl -fsSL https://pkgx.sh | sh" >&2
+  exit 1
+fi
+`;
+      return new Response(script, {
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
 
     // Why page
@@ -1128,6 +1157,66 @@ export default {
     if (path === "/blog/agents") {
       track(env, "pageview", ["/blog/agents"]);
       return new Response(BLOG_AGENTS_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/share-localhost") {
+      track(env, "pageview", ["/blog/share-localhost"]);
+      return new Response(BLOG_SHARE_LOCALHOST_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/without-vercel") {
+      track(env, "pageview", ["/blog/without-vercel"]);
+      return new Response(BLOG_WITHOUT_VERCEL_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/ai-agent-deploy") {
+      track(env, "pageview", ["/blog/ai-agent-deploy"]);
+      return new Response(BLOG_AI_AGENT_DEPLOY_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/fastest-preview-url") {
+      track(env, "pageview", ["/blog/fastest-preview-url"]);
+      return new Response(BLOG_FASTEST_PREVIEW_URL_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/surge-vs-vercel-vs-sher") {
+      track(env, "pageview", ["/blog/surge-vs-vercel-vs-sher"]);
+      return new Response(BLOG_SURGE_VS_VERCEL_VS_SHER_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/claude-code-deploy") {
+      track(env, "pageview", ["/blog/claude-code-deploy"]);
+      return new Response(BLOG_CLAUDE_CODE_DEPLOY_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/agent-deploy-step") {
+      track(env, "pageview", ["/blog/agent-deploy-step"]);
+      return new Response(BLOG_AGENT_DEPLOY_STEP_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/share-nextjs") {
+      track(env, "pageview", ["/blog/share-nextjs"]);
+      return new Response(BLOG_SHARE_NEXTJS_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/replace-vercel-previews") {
+      track(env, "pageview", ["/blog/replace-vercel-previews"]);
+      return new Response(BLOG_REPLACE_VERCEL_PREVIEWS_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/openclaw-deploy") {
+      track(env, "pageview", ["/blog/openclaw-deploy"]);
+      return new Response(BLOG_OPENCLAW_DEPLOY_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }
