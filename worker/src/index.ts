@@ -7,6 +7,7 @@ import { WELCOME_HTML } from "./welcome.js";
 interface Env {
   BUCKET: R2Bucket;
   KV: KVNamespace;
+  ANALYTICS: AnalyticsEngineDataset;
   GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
   POLAR_WEBHOOK_SECRET: string;
@@ -74,6 +75,26 @@ function errorResponse(
   extra?: Record<string, unknown>
 ): Response {
   return Response.json({ error: { code, message, ...extra } }, { status });
+}
+
+// --- Analytics ---
+// Analytics Engine: blobs[0]=event, blobs[1..]=dimensions, doubles[0..]=metrics
+// Query via CF dashboard or SQL API
+function track(
+  env: Env,
+  event: string,
+  blobs: string[] = [],
+  doubles: number[] = []
+): void {
+  try {
+    env.ANALYTICS.writeDataPoint({
+      indexes: [event],
+      blobs: [event, ...blobs],
+      doubles,
+    });
+  } catch {
+    // Analytics should never break the request
+  }
 }
 
 // --- Auth ---
@@ -176,6 +197,7 @@ async function handleUpload(
 
   const rateCheck = await checkRateLimit(env, rateLimitKey, tier.maxUploads);
   if (!rateCheck.allowed) {
+    track(env, "rate_limit", [auth.tier, rateLimitKey]);
     const message = upgradeHint
       ? `Rate limit reached (${tier.maxUploads}/day). ${upgradeHint}`
       : `Daily upload limit reached (${tier.maxUploads}/day). Resets at midnight UTC.`;
@@ -256,6 +278,7 @@ async function handleUpload(
 
   // Gate password behind pro tier
   if (payload.password && !tier.canPassword) {
+    track(env, "pro_gate", [auth.tier, "password"]);
     const msg = auth.authenticated
       ? "Password-protected links require Pro. Run `sher upgrade`."
       : "Password-protected links require Pro. Run `sher login` then `sher upgrade`.";
@@ -360,6 +383,9 @@ async function handleUpload(
   }
 
   await Promise.all(uploads);
+
+  const cliVersion = request.headers.get("X-Sher-Version") ?? "unknown";
+  track(env, "upload", [auth.tier, cliVersion, passwordHash ? "password" : "public"], [fileEntries.length, totalDecodedSize]);
 
   return Response.json({ url: deployUrl, id, expires: expiresAt });
 }
@@ -595,6 +621,8 @@ async function handleAuthCallback(
   // Clean up state
   await env.KV.delete(`auth_state:${state}`);
 
+  track(env, "login", [user.login, String(user.id)]);
+
   // Redirect back to CLI's local server
   const callbackUrl = new URL(`http://localhost:${port}/callback`);
   callbackUrl.searchParams.set("token", sherToken);
@@ -804,6 +832,8 @@ async function handlePolarWebhook(
         break;
     }
 
+    track(env, "webhook", [event.type, userId]);
+
     return new Response("OK", { status: 200 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
@@ -981,6 +1011,7 @@ export default {
 
     // Landing
     if (path === "/") {
+      track(env, "pageview", ["/"]);
       return new Response(LANDING_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
@@ -995,6 +1026,7 @@ export default {
 
     // Why page
     if (path === "/why") {
+      track(env, "pageview", ["/why"]);
       return new Response(WHY_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
@@ -1002,6 +1034,7 @@ export default {
 
     // Pricing page
     if (path === "/pricing") {
+      track(env, "pageview", ["/pricing"]);
       return new Response(PRICING_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
@@ -1009,6 +1042,7 @@ export default {
 
     // Welcome page (post-checkout)
     if (path === "/welcome") {
+      track(env, "pageview", ["/welcome"]);
       return new Response(WELCOME_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });

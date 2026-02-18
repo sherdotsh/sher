@@ -17,3 +17,7 @@ bucket_name = "sher-uploads"
 [[kv_namespaces]]
 binding = "KV"
 id = "6c08fefdc4394d559a0044111a7cecc1"
+
+[[analytics_engine_datasets]]
+binding = "ANALYTICS"
+dataset = "sher_events"

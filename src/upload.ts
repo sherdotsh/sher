@@ -1,4 +1,4 @@
-import { API_URL } from "./constants.js";
+import { API_URL, VERSION } from "./constants.js";
 import { getAuth } from "./auth.js";
 import type { FileMap } from "./collect.js";
 
@@ -26,6 +26,7 @@ export async function uploadFiles(
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    "X-Sher-Version": VERSION,
   };
 
   const auth = getAuth();

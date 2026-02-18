@@ -1,4 +1,4 @@
-import { API_URL } from "./constants.js";
+import { API_URL, VERSION } from "./constants.js";
 import { getAuth } from "./auth.js";
 
 interface DeployInfo {
@@ -15,7 +15,7 @@ export async function listDeploys(): Promise<DeployInfo[]> {
   if (!auth) throw new Error("Login required. Run `sher login` first.");
 
   const res = await fetch(`${API_URL}/api/deployments`, {
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${auth.token}`, "X-Sher-Version": VERSION },
   });
 
   if (!res.ok) {
@@ -35,7 +35,7 @@ export async function deleteDeploy(id: string): Promise<void> {
 
   const res = await fetch(`${API_URL}/api/deployments/${id}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${auth.token}`, "X-Sher-Version": VERSION },
   });
 
   if (!res.ok) {
@@ -52,7 +52,7 @@ export async function createCheckout(): Promise<{ url: string }> {
 
   const res = await fetch(`${API_URL}/api/checkout`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${auth.token}`, "X-Sher-Version": VERSION },
   });
 
   if (!res.ok) {
@@ -75,7 +75,7 @@ export async function getSubscription(): Promise<SubscriptionInfo> {
   if (!auth) throw new Error("Login required. Run `sher login` first.");
 
   const res = await fetch(`${API_URL}/api/subscription`, {
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${auth.token}`, "X-Sher-Version": VERSION },
   });
 
   if (!res.ok) {
