@@ -68,7 +68,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
   /* Header */
   .header{text-align:center;margin-bottom:2.5rem}
   .logo{font-size:2.8rem;font-weight:700;letter-spacing:-.03em}
-  .beta{font-size:.55rem;color:#f97316;border:1px solid #f9731640;padding:2px 6px;border-radius:9999px;font-weight:500;letter-spacing:.03em;text-transform:uppercase;vertical-align:super;margin-left:.15rem}
+  .beta{font-size:.55rem;color:#f97316;border:1px solid #f9731640;padding:2px 6px;border-radius:9999px;font-weight:500;letter-spacing:.03em;text-transform:uppercase;vertical-align:baseline;margin-left:.15rem}
   .tagline{color:#71717a;font-size:1.1rem;margin-top:.35rem;position:relative;display:inline-block}
   .aside{
     position:absolute;
