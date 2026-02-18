@@ -257,6 +257,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
   <a href="/pricing">Pricing</a>
   <a href="/terms">Terms</a>
   <a href="/privacy">Privacy</a>
+  <a href="mailto:hi@sher.sh">Contact</a>
 </div>
 
 </div><!-- .main -->
