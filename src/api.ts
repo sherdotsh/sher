@@ -65,6 +65,30 @@ export async function createCheckout(): Promise<{ url: string }> {
   return (await res.json()) as { url: string };
 }
 
+interface PreflightResult {
+  allowed: boolean;
+  used: number;
+  limit: number;
+  tier: string;
+  resetsAt: string;
+}
+
+export async function checkPreflight(): Promise<PreflightResult> {
+  const headers: Record<string, string> = { "X-Sher-Version": VERSION };
+  const auth = getAuth();
+  if (auth) {
+    headers["Authorization"] = `Bearer ${auth.token}`;
+  }
+
+  const res = await fetch(`${API_URL}/api/preflight`, { headers });
+
+  if (!res.ok) {
+    throw new Error(`Preflight check failed (${res.status})`);
+  }
+
+  return (await res.json()) as PreflightResult;
+}
+
 interface SubscriptionInfo {
   tier: string;
   subscription: { status: string; polarSubId: string } | null;

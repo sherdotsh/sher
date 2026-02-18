@@ -1038,6 +1038,28 @@ export default {
       return res;
     }
 
+    // Pre-flight rate limit check (doesn't increment)
+    if (path === "/api/preflight" && request.method === "GET") {
+      const auth = await resolveAuth(env, request);
+      const tier = TIERS[auth.tier];
+      const rateLimitKey = auth.authenticated
+        ? `user:${auth.userId}`
+        : `ip:${request.headers.get("CF-Connecting-IP") ?? "unknown"}`;
+      const today = new Date().toISOString().split("T")[0];
+      const kvKey = `ratelimit:${rateLimitKey}:${today}`;
+      const current = parseInt((await env.KV.get(kvKey)) ?? "0", 10);
+      const allowed = current < tier.maxUploads;
+      const res = Response.json({
+        allowed,
+        used: current,
+        limit: tier.maxUploads,
+        tier: auth.tier,
+        resetsAt: getResetTime(),
+      });
+      res.headers.set("Access-Control-Allow-Origin", "*");
+      return res;
+    }
+
     // Health check
     if (path === "/api/health") {
       return Response.json({ status: "ok" });
@@ -1098,9 +1120,13 @@ export default {
       const script = `#!/bin/sh
 set -e
 if command -v npx >/dev/null 2>&1; then
-  exec npx -y shersh "$@"
+  npx -y shersh "$@"
+  echo ""
+  echo "  tip: install sher globally with: npm i -g shersh"
 elif command -v pkgx >/dev/null 2>&1; then
-  exec pkgx npx -y shersh "$@"
+  pkgx npx -y shersh "$@"
+  echo ""
+  echo "  tip: install sher globally with: npm i -g shersh"
 else
   echo "sher: npx not found. Install Node.js or run: curl -fsSL https://pkgx.sh | sh" >&2
   exit 1

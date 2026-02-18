@@ -6,7 +6,7 @@ import { collectFiles } from "./collect.js";
 import { uploadFiles } from "./upload.js";
 import { copyToClipboard } from "./clipboard.js";
 import { getAuth, login, logout, openBrowser } from "./auth.js";
-import { listDeploys, deleteDeploy, createCheckout, getSubscription } from "./api.js";
+import { listDeploys, deleteDeploy, createCheckout, getSubscription, checkPreflight } from "./api.js";
 import { prepareNextStaticExport, restoreAll } from "./static-export.js";
 import { MAX_UPLOAD_SIZE, DEFAULT_TTL, VERSION } from "./constants.js";
 
@@ -105,6 +105,25 @@ async function cmdLink(flags: Record<string, string | boolean>) {
     console.log(
       `  ${dim("tip")}       ${dim(`run \`sher login\` for longer links & higher limits`)}\n`
     );
+  }
+
+  // Pre-flight rate limit check (before building)
+  try {
+    const preflight = await checkPreflight();
+    if (!preflight.allowed) {
+      const upgradeHint =
+        preflight.tier === "anon"
+          ? `Run ${dim("`sher login`")} for up to 25/day.`
+          : preflight.tier === "auth"
+            ? `Run ${dim("`sher upgrade`")} for up to 200/day.`
+            : "";
+      console.error(
+        `\n  ${red(`Rate limit reached (${preflight.limit}/day).`)} ${upgradeHint}\n`
+      );
+      process.exit(1);
+    }
+  } catch {
+    // Preflight failed (offline, etc.) — continue and let upload handle it
   }
 
   let outputDir: string;
