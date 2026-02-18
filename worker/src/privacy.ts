@@ -5,6 +5,8 @@ export const PRIVACY_HTML = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>sher — privacy policy</title>
+<meta name="description" content="sher privacy policy. What we collect, what we don't, and how your data is handled.">
+<link rel="canonical" href="https://sher.sh/privacy">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{

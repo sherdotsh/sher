@@ -5,6 +5,8 @@ export const TERMS_HTML = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>sher — terms of service</title>
+<meta name="description" content="sher terms of service. Acceptable use, billing, and your content.">
+<link rel="canonical" href="https://sher.sh/terms">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{

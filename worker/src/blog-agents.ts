@@ -123,33 +123,13 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
   <h1>Get your AI agents to build & deploy</h1>
   <span class="date">February 2026</span>
 
-  <p>AI agents can write code. They can scaffold a project. Build a component. Wire up an API. Ship a full landing page from a prompt.</p>
+  <p>Coding agents have gotten really good at writing code, but there's an awkward gap at the end of the loop — your agent builds something and then you still have to <code>npm run dev</code> it yourself to actually see what it made.</p>
 
-  <p>But then what?</p>
-
-  <p>You still have to run it yourself. Open the terminal. <code>npm run dev</code>. Check the browser. See if it actually works. The loop is broken.</p>
-
-  <h2>The gap</h2>
-
-  <p>Your agent just built a landing page. Or a dashboard. Or fixed a bug in your React app. Where is it? <strong>Sitting in your file system.</strong></p>
-
-  <p>You have to start a dev server. Or push to a branch and wait for a preview deploy. Or share your screen on a call.</p>
-
-  <p>That's not an agent workflow. That's a human workflow with extra steps.</p>
-
-  <h2>One command</h2>
-
-  <p><code>sher link</code>. That's it.</p>
-
-  <p>It builds the project. Uploads the output. Returns a live URL.</p>
-
-  <p>Your agent runs <code>sher link</code>. Gets back something like <code>https://a8xk2m1p.sher.sh</code>. Shows you the link. You click. You see the result. Done.</p>
-
-  <p>No config. No deployment pipeline. No dashboard. Just a URL that works.</p>
+  <p>We wanted to close that gap. If an agent can write the code, it should be able to hand you a link to the running thing too.</p>
 
   <h2>How it works</h2>
 
-  <p>sher detects the framework. Vite, Next.js, Astro, whatever. Runs the build. Collects the output. Uploads it. The whole thing takes seconds.</p>
+  <p>sher is a CLI that builds your frontend project and uploads it to a preview URL. The agent runs <code>sher link</code> in the project directory, and a few seconds later it has a live URL like <code>https://a8xk2m1p.sher.sh</code> to give back to you.</p>
 
   <pre><code>$ sher link
 
@@ -163,35 +143,35 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
   https://a8xk2m1p.sher.sh  (copied)
   expires 2/19/2026, 11:00 AM</code></pre>
 
-  <p>No accounts for basic usage. No config files. No environment variables. Your agent runs it, gets a URL, hands it to you.</p>
+  <p>It auto-detects frameworks (Vite, Next.js, Astro, CRA), picks up the right package manager, and handles the build. No config, no accounts for basic usage — just a command that returns a URL. That makes it a natural fit for agents, since there's nothing interactive about it.</p>
 
-  <h2>The skill</h2>
+  <h2>The agent skill</h2>
 
-  <p>We built an agent skill for this. It teaches your coding agent when and how to use sher.</p>
+  <p>To make this easy to set up, we published an <a href="https://skills.sh">agent skill</a> that teaches your coding agent when and how to use sher. Install it with:</p>
 
   <pre><code>npx skills add sherdotsh/sher</code></pre>
 
-  <p>Works with Claude Code, Cursor, Codex, OpenCode, and <a href="https://skills.sh">35+ other agents</a>. After your agent builds a frontend project, it deploys with sher and gives you the link.</p>
+  <p>It works with Claude Code, Cursor, Codex, OpenCode, and <a href="https://skills.sh">35+ other agents</a>. Once installed, your agent knows to run <code>sher link</code> after building a frontend project and pass the preview URL back to you.</p>
 
   <div class="callout">
     <div class="callout-header">
       <span class="callout-icon">&#129438;</span>
       <span class="callout-title">Works great with OpenClaw</span>
     </div>
-    <p><a href="https://github.com/openclaw/openclaw">OpenClaw</a> is an open-source AI agent you can message on Signal, Telegram, Discord, or WhatsApp. It can write code, create its own skills, and run commands on your machine.</p>
-    <p>Pair it with sher and the workflow looks like this:</p>
+    <p><a href="https://github.com/openclaw/openclaw">OpenClaw</a> is an open-source AI agent you can message on Signal, Telegram, Discord, or WhatsApp. It writes code, runs commands, and can even create its own skills on the fly.</p>
+    <p>With sher installed, the workflow becomes:</p>
     <div class="flow">
       <span>you:</span> "build me a landing page for my bakery"<br>
       <span>openclaw:</span> scaffolds project, writes code<br>
       <span>openclaw:</span> runs sher link<br>
       <span>openclaw:</span> "here's your preview: https://k4m2x8p1.sher.sh"
     </div>
-    <p>Message your agent. Get a live URL back. That's the whole loop.</p>
+    <p>You message your agent, it builds the thing, and sends you a live URL. That's the whole loop closed.</p>
   </div>
 
   <h2>Get started</h2>
 
-  <p>Install sher globally so your agents can use it:</p>
+  <p>Install sher so your agents have access to it:</p>
 
   <div class="cta">
     <code>npm i -g shersh</code>

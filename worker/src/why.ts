@@ -5,6 +5,8 @@ export const WHY_HTML = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>why sher?</title>
+<meta name="description" content="You built something. You want to show it. sher gives you a preview link in one command.">
+<link rel="canonical" href="https://sher.sh/why">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{

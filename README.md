@@ -2,7 +2,7 @@
   <img src="https://sher.sh/favicon.svg" alt="sher" width="80" />
 
   <h1>sher</h1>
-  <p>Share frontend project previews via ephemeral URLs.</p>
+  <p>Instant preview links for your projects.</p>
 
   <a href="https://www.npmjs.com/package/shersh"><img src="https://img.shields.io/npm/v/shersh?color=22c55e&label=npm" alt="npm version"></a>
   <a href="https://github.com/sherdotsh/sher/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
@@ -10,7 +10,7 @@
 
   <br/><br/>
 
-  <a href="https://sher.sh">Website</a> · <a href="https://sher.sh/why">Why?</a> · <a href="https://github.com/sherdotsh/sher/issues/new">Report Bug</a>
+  <a href="https://sher.sh">Website</a> · <a href="https://sher.sh/why">Why?</a> · <a href="https://sher.sh/pricing">Pricing</a> · <a href="https://github.com/sherdotsh/sher/issues/new">Report Bug</a>
 </div>
 
 ---
@@ -24,9 +24,9 @@ $ sher link
   building   npm run build
 
   files      12 files (194KB)
-  uploading  ...
+  uploading  ⠋
 
-  https://sher.sh/a8xk2m1p  (copied)
+  https://a8xk2m1p.sher.sh  (copied)
   expires 2/19/2026, 11:00 AM
 ```
 
@@ -45,32 +45,39 @@ sher link                  # Build and share
 sher link --no-build       # Skip build step
 sher link --dir ./my-build # Share a specific directory
 sher link --ttl 4          # Set link expiry in hours
-sher link --pass           # Password-protect with random password
-sher link --pass mysecret  # Password-protect with specific password
+sher link --pass           # Password-protect (Pro)
+sher link --pass mysecret  # Password-protect with specific password (Pro)
 ```
 
-## Authentication
-
-Anonymous usage gives you 3 links/day with 1-hour expiry. Log in with GitHub for higher limits.
+## Commands
 
 ```bash
-sher login     # Opens browser, authenticates via GitHub
-sher whoami    # Check login status
-sher logout    # Remove stored credentials
+sher link       # Build project and get a preview link
+sher list       # Show your active deployments
+sher delete <id># Delete a deployment
+sher login      # Authenticate with GitHub
+sher logout     # Remove stored credentials
+sher whoami     # Show login status and tier
+sher upgrade    # Upgrade to Pro ($8/mo)
 ```
 
-| | Anonymous | Logged in |
-|---|---|---|
-| Links per day | 3 | 50 |
-| Max TTL | 1 hour | 7 days |
-| Max upload size | 10 MB | 50 MB |
+## Tiers
+
+|  | Free | Starter | Pro |
+|---|---|---|---|
+| Price | $0 | $0 (GitHub login) | $8/mo |
+| Links per day | 1 | 25 | 200 |
+| Max TTL | 6 hours | 24 hours | 7 days |
+| Max upload size | 10 MB | 50 MB | 100 MB |
+| Password-protected links | — | — | ✓ |
+| List & delete links | — | ✓ | ✓ |
 
 ## Supported frameworks
 
 sher auto-detects your project and runs the right build command.
 
 - Vite (React, Vue, Svelte, etc.)
-- Next.js (static export)
+- Next.js (static export — auto-configured)
 - Astro
 - Create React App
 - Any project with a `build` script and a `dist/`, `build/`, or `out/` directory
@@ -102,7 +109,17 @@ npx wrangler secret put GITHUB_CLIENT_ID
 npx wrangler secret put GITHUB_CLIENT_SECRET
 ```
 
-### 3. Point the CLI at your instance
+### 3. Set up billing (optional)
+
+If you want to enable Pro subscriptions via [Polar](https://polar.sh):
+
+```bash
+npx wrangler secret put POLAR_WEBHOOK_SECRET
+npx wrangler secret put POLAR_ACCESS_TOKEN
+npx wrangler secret put POLAR_PRO_PRODUCT_ID
+```
+
+### 4. Point the CLI at your instance
 
 ```bash
 export SHER_API_URL=https://your-worker.workers.dev
