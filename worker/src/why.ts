@@ -3,6 +3,7 @@ export const WHY_HTML = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>why sher?</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -66,7 +67,7 @@ export const WHY_HTML = `<!DOCTYPE html>
   <p>The iteration loop with AI is fast now. Sharing should be just as fast.</p>
 
   <div class="cta">
-    <code>npm i -g sher</code>
+    <code>npm i -g shersh</code>
   </div>
 </div>
 </body>

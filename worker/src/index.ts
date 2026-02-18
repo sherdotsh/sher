@@ -1,5 +1,6 @@
 import { LANDING_HTML } from "./landing.js";
 import { WHY_HTML } from "./why.js";
+import { FAVICON_SVG } from "./favicon.js";
 
 interface Env {
   BUCKET: R2Bucket;
@@ -579,6 +580,13 @@ export default {
     if (path === "/") {
       return new Response(LANDING_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Favicon
+    if (path === "/favicon.svg") {
+      return new Response(FAVICON_SVG, {
+        headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=86400" },
       });
     }
 

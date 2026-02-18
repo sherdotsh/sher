@@ -4,6 +4,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>sher — share your work</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="description" content="Share frontend project previews via ephemeral URLs. No accounts, no config. Just sher link.">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -168,7 +169,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
 </div>
 
 <div class="install">
-  <div class="install-cmd">npm i -g <span>sher</span></div>
+  <div class="install-cmd">npm i -g <span>shersh</span></div>
   <button class="copy-btn" onclick="copyInstall(this)">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
     Copy
@@ -267,7 +268,7 @@ async function run() {
 }
 
 function copyInstall(btn) {
-  navigator.clipboard.writeText('npm i -g sher');
+  navigator.clipboard.writeText('npm i -g shersh');
   btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
   btn.classList.add('copied-btn');
   setTimeout(() => {

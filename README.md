@@ -1,6 +1,19 @@
-# sher
+<div align="center">
+  <img src="https://sher.sh/favicon.svg" alt="sher" width="80" />
 
-Share frontend project previews via ephemeral URLs.
+  <h1>sher</h1>
+  <p>Share frontend project previews via ephemeral URLs.</p>
+
+  <a href="https://www.npmjs.com/package/shersh"><img src="https://img.shields.io/npm/v/shersh?color=22c55e&label=npm" alt="npm version"></a>
+  <a href="https://github.com/sherdotsh/sher/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
+  <a href="https://github.com/sherdotsh/sher/issues"><img src="https://img.shields.io/github/issues/sherdotsh/sher" alt="Issues"></a>
+
+  <br/><br/>
+
+  <a href="https://sher.sh">Website</a> · <a href="https://sher.sh/why">Why?</a> · <a href="https://github.com/sherdotsh/sher/issues/new">Report Bug</a>
+</div>
+
+---
 
 ```
 $ sher link
@@ -17,33 +30,26 @@ $ sher link
   expires 2/19/2026, 11:00 AM
 ```
 
+---
+
 ## Install
 
 ```bash
-npm i -g sher
+npm i -g shersh
 ```
 
 ## Usage
 
 ```bash
-# Share the current project (auto-detects framework, builds, uploads)
-sher link
-
-# Skip the build step
-sher link --no-build
-
-# Share a specific directory
-sher link --dir ./my-build
-
-# Set link expiry (default: 24h, max: 168h with login)
-sher link --ttl 4
-
-# Password-protect a preview
-sher link --pass
-sher link --pass mysecret
+sher link                  # Build and share
+sher link --no-build       # Skip build step
+sher link --dir ./my-build # Share a specific directory
+sher link --ttl 4          # Set link expiry in hours
+sher link --pass           # Password-protect with random password
+sher link --pass mysecret  # Password-protect with specific password
 ```
 
-### Authentication
+## Authentication
 
 Anonymous usage gives you 3 links/day with 1-hour expiry. Log in with GitHub for higher limits.
 
