@@ -1,3 +1,9 @@
 node_modules
 dist
 .wrangler
+.env
+.env.*
+.dev.vars
+.sher/
+*.log
+.DS_Store
