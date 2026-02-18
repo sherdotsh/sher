@@ -181,6 +181,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
     GitHub
   </a>
   <a href="https://github.com/sherdotsh/sher#readme" target="_blank">Docs</a>
+  <a href="/why">Why?</a>
 </div>
 
 <script>

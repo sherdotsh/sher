@@ -1,4 +1,5 @@
 import { LANDING_HTML } from "./landing.js";
+import { WHY_HTML } from "./why.js";
 
 interface Env {
   BUCKET: R2Bucket;
@@ -577,6 +578,13 @@ export default {
     // Landing
     if (path === "/") {
       return new Response(LANDING_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Why page
+    if (path === "/why") {
+      return new Response(WHY_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }
