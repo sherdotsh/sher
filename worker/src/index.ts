@@ -347,6 +347,7 @@ async function handleUpload(
     fileCount: fileEntries.length,
     userId: auth.userId ?? null,
     username: auth.username ?? null,
+    tier: auth.tier,
     passwordHash,
   };
   uploads.push(
@@ -433,6 +434,7 @@ ${error ? '<div class="err">Wrong password. Try again.</div>' : ""}
 interface DeployMeta {
   expiresAt: string;
   passwordHash: string | null;
+  tier?: string;
 }
 
 async function handleServe(
@@ -488,14 +490,24 @@ async function handleServe(
     return new Response("File not found", { status: 404 });
   }
 
-  return new Response(object.body, {
-    headers: {
-      "Content-Type":
-        object.httpMetadata?.contentType ?? "application/octet-stream",
-      "Cache-Control": "public, max-age=3600",
-      "X-Sher-Expires": meta.expiresAt,
-    },
-  });
+  const contentType = object.httpMetadata?.contentType ?? "application/octet-stream";
+  const headers = {
+    "Content-Type": contentType,
+    "Cache-Control": "public, max-age=3600",
+    "X-Sher-Expires": meta.expiresAt,
+  };
+
+  // Inject badge for non-pro HTML pages
+  if (contentType.includes("text/html") && meta.tier !== "pro") {
+    const html = await object.text();
+    const badge = `<a href="https://sher.sh?ref=badge" target="_blank" style="position:fixed;bottom:12px;right:12px;background:#111113;border:1px solid #27272a;color:#a1a1aa;font-family:system-ui,-apple-system,sans-serif;font-size:12px;padding:5px 10px;border-radius:6px;text-decoration:none;z-index:999999;display:flex;align-items:center;gap:5px;transition:border-color .15s,color .15s" onmouseover="this.style.borderColor='#3f3f46';this.style.color='#fafafa'" onmouseout="this.style.borderColor='#27272a';this.style.color='#a1a1aa'"><svg width="12" height="12" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#27272a"/><path d="M13 19 L11.5 20.5 C10 22 10 24 11.5 25.5 C13 27 15 27 16.5 25.5 L18 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M19 13 L20.5 11.5 C22 10 22 8 20.5 6.5 C19 5 17 5 15.5 6.5 L14 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="13.5" y1="18.5" x2="18.5" y2="13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>shared with sher</a>`;
+    const injected = html.includes("</body>")
+      ? html.replace("</body>", `${badge}</body>`)
+      : html + badge;
+    return new Response(injected, { headers });
+  }
+
+  return new Response(object.body, { headers });
 }
 
 // --- Password unlock handler ---

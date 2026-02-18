@@ -188,9 +188,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
   .gh-icon{width:16px;height:16px;fill:currentColor}
 
   /* Mobile */
-  @media(max-width:720px){
-    .aside{display:none}
-  }
+  @media(max-width:720px){}
   @media(max-width:560px){
     .logo{font-size:2.2rem}
     .terminal-body{padding:16px;font-size:.78rem;height:260px}
