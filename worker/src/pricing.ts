@@ -4,8 +4,8 @@ export const PRICING_HTML = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<title>sher — pricing</title>
-<meta name="description" content="Free to start. Pro for $8/mo — 200 links/day, 7-day TTL, password-protected previews.">
+<title>sher | pricing</title>
+<meta name="description" content="Free to start. Pro for $8/mo, 200 links/day, 7-day TTL, password-protected previews.">
 <link rel="canonical" href="https://sher.sh/pricing">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}

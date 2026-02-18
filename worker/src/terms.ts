@@ -4,7 +4,7 @@ export const TERMS_HTML = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<title>sher — terms of service</title>
+<title>sher | terms of service</title>
 <meta name="description" content="sher terms of service. Acceptable use, billing, and your content.">
 <link rel="canonical" href="https://sher.sh/terms">
 <style>
@@ -54,7 +54,7 @@ export const TERMS_HTML = `<!DOCTYPE html>
   <p>Preview links are temporary and expire automatically. We make no guarantee of availability or uptime. Don't rely on sher for permanent hosting.</p>
 
   <h2>Accounts and billing</h2>
-  <p>Free accounts are created via GitHub OAuth. Pro subscriptions are billed monthly through Polar. You can cancel anytime — access continues until the end of your billing period. No refunds for partial months.</p>
+  <p>Free accounts are created via GitHub OAuth. Pro subscriptions are billed monthly through Polar. You can cancel anytime, and access continues until the end of your billing period. No refunds for partial months.</p>
 
   <h2>Your content</h2>
   <p>You retain ownership of everything you upload. We don't claim any rights to your content. Uploaded files are automatically deleted when links expire.</p>

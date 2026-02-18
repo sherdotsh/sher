@@ -4,7 +4,7 @@ export const BLOG_HTML = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<title>blog — sher</title>
+<title>blog | sher</title>
 <meta name="description" content="Updates, ideas, and guides from sher.">
 <link rel="canonical" href="https://sher.sh/blog">
 <style>

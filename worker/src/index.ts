@@ -398,7 +398,7 @@ async function handleUpload(
 function passwordPage(id: string, error?: boolean): Response {
   return new Response(
     `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>sher — protected preview</title>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>sher | protected preview</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:system-ui,-apple-system,sans-serif;background:#09090b;color:#fafafa;display:flex;justify-content:center;align-items:center;height:100vh}

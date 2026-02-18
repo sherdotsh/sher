@@ -3,15 +3,15 @@ export const LANDING_HTML = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>sher — instant preview links for your projects</title>
+<title>sher | instant preview links for your projects</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="description" content="Instant preview links for your projects. No accounts, no config. Just sher link.">
-<meta property="og:title" content="sher — instant preview links for your projects">
+<meta property="og:title" content="sher | instant preview links for your projects">
 <meta property="og:description" content="One command. Get a URL. Send it. Works with Vite, Next.js, Astro, plain HTML.">
 <meta property="og:url" content="https://sher.sh">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="sher — instant preview links for your projects">
+<meta name="twitter:title" content="sher | instant preview links for your projects">
 <meta name="twitter:description" content="One command. Get a URL. Send it. Works with Vite, Next.js, Astro, plain HTML.">
 <link rel="canonical" href="https://sher.sh">
 <style>
@@ -71,12 +71,12 @@ export const LANDING_HTML = `<!DOCTYPE html>
   .tagline{color:#71717a;font-size:1.1rem;margin-top:.35rem;position:relative;display:inline-block}
   .aside{
     position:absolute;
-    right:-7.5rem;
-    top:-.25rem;
+    right:-6.5rem;
+    top:.15rem;
     color:#3f3f46;
     font-size:.7rem;
     font-style:italic;
-    transform:rotate(-6deg);
+    transform:rotate(-8deg);
     white-space:nowrap;
     pointer-events:none;
     user-select:none;

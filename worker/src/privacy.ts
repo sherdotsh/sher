@@ -4,7 +4,7 @@ export const PRIVACY_HTML = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<title>sher — privacy policy</title>
+<title>sher | privacy policy</title>
 <meta name="description" content="sher privacy policy. What we collect, what we don't, and how your data is handled.">
 <link rel="canonical" href="https://sher.sh/privacy">
 <style>
@@ -57,9 +57,9 @@ export const PRIVACY_HTML = `<!DOCTYPE html>
 
   <h2>Third-party services</h2>
   <ul>
-    <li><strong>Cloudflare</strong> — hosting, storage, analytics</li>
-    <li><strong>GitHub</strong> — authentication (OAuth)</li>
-    <li><strong>Polar</strong> — payment processing</li>
+    <li><strong>Cloudflare</strong>: hosting, storage, analytics</li>
+    <li><strong>GitHub</strong>: authentication (OAuth)</li>
+    <li><strong>Polar</strong>: payment processing</li>
   </ul>
 
   <h2>Data deletion</h2>

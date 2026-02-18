@@ -4,14 +4,14 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<title>Get your AI agents to build & deploy — sher</title>
+<title>Get your AI agents to build & deploy | sher</title>
 <meta name="description" content="AI agents can write code. Now they can deploy it too. One command. Live URL. No config.">
-<meta property="og:title" content="Get your AI agents to build & deploy — sher">
+<meta property="og:title" content="Get your AI agents to build & deploy | sher">
 <meta property="og:description" content="AI agents can write code. Now they can deploy it too. One command. Live URL. No config.">
 <meta property="og:url" content="https://sher.sh/blog/agents">
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Get your AI agents to build & deploy — sher">
+<meta name="twitter:title" content="Get your AI agents to build & deploy | sher">
 <meta name="twitter:description" content="AI agents can write code. Now they can deploy it too. One command. Live URL. No config.">
 <link rel="canonical" href="https://sher.sh/blog/agents">
 <style>
@@ -115,25 +115,26 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
   }
   .copy-btn:hover{background:#3f3f46;color:#fafafa}
   .copy-btn.copied-btn{color:#22c55e;border-color:#22c55e40}
+  .brand{color:#e4e4e7;font-weight:500}
 </style>
 </head>
 <body>
 <div class="content">
-  <a href="/blog" class="back">&larr; blog</a>
+  <a href="/" class="back">&larr; sher.sh</a>
   <h1>Get your AI agents to build & deploy</h1>
   <span class="date">February 2026</span>
 
-  <p>Coding agents have gotten really good at writing code, but there's an awkward gap at the end of the loop — your agent builds something and then you still have to <code>npm run dev</code> it yourself to actually see what it made.</p>
+  <p>Coding agents have gotten really good at writing code, but there's an awkward gap at the end of the loop. Your agent builds something and then you still have to <code>npm run dev</code> it yourself to actually see what it made.</p>
 
   <p>We wanted to close that gap. If an agent can write the code, it should be able to hand you a link to the running thing too.</p>
 
   <h2>How it works</h2>
 
-  <p>sher is a CLI that builds your frontend project and uploads it to a preview URL. The agent runs <code>sher link</code> in the project directory, and a few seconds later it has a live URL like <code>https://a8xk2m1p.sher.sh</code> to give back to you.</p>
+  <p><span class="brand">sher</span> is a CLI that builds your frontend project and uploads it to a preview URL. The agent runs <code>sher link</code> in the project directory, and a few seconds later it has a live URL like <code>https://a8xk2m1p.sher.sh</code> to give back to you.</p>
 
   <pre><code>$ sher link
 
-  sher — share your work
+  sher - share your work
 
   framework  Next.js
   building   npm run build
@@ -143,11 +144,11 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
   https://a8xk2m1p.sher.sh  (copied)
   expires 2/19/2026, 11:00 AM</code></pre>
 
-  <p>It auto-detects frameworks (Vite, Next.js, Astro, CRA), picks up the right package manager, and handles the build. No config, no accounts for basic usage — just a command that returns a URL. That makes it a natural fit for agents, since there's nothing interactive about it.</p>
+  <p>It auto-detects frameworks (Vite, Next.js, Astro, CRA), picks up the right package manager, and handles the build. No config needed, no accounts for basic usage. That makes it a natural fit for agents, since there's nothing interactive about it.</p>
 
   <h2>The agent skill</h2>
 
-  <p>To make this easy to set up, we published an <a href="https://skills.sh">agent skill</a> that teaches your coding agent when and how to use sher. Install it with:</p>
+  <p>To make this easy to set up, we published an <a href="https://skills.sh">agent skill</a> that teaches your coding agent when and how to use <span class="brand">sher</span>. Install it with:</p>
 
   <pre><code>npx skills add sherdotsh/sher</code></pre>
 
@@ -159,7 +160,7 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
       <span class="callout-title">Works great with OpenClaw</span>
     </div>
     <p><a href="https://github.com/openclaw/openclaw">OpenClaw</a> is an open-source AI agent you can message on Signal, Telegram, Discord, or WhatsApp. It writes code, runs commands, and can even create its own skills on the fly.</p>
-    <p>With sher installed, the workflow becomes:</p>
+    <p>With <span class="brand">sher</span> installed, the workflow becomes:</p>
     <div class="flow">
       <span>you:</span> "build me a landing page for my bakery"<br>
       <span>openclaw:</span> scaffolds project, writes code<br>
@@ -171,7 +172,7 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
 
   <h2>Get started</h2>
 
-  <p>Install sher so your agents have access to it:</p>
+  <p>Install <span class="brand">sher</span> so your agents have access to it:</p>
 
   <div class="cta">
     <code>npm i -g shersh</code>

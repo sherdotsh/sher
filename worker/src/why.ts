@@ -71,17 +71,13 @@ export const WHY_HTML = `<!DOCTYPE html>
   <a href="/" class="back">&larr; sher.sh</a>
   <h1>Why sher?</h1>
 
-  <p>You built something. You want to show it to someone. Should be simple.</p>
+  <p>You built something and you want to show it to someone. Should be simple, but instead you're setting up a Vercel project, or pushing to a branch for a preview deploy, or telling someone to clone your repo and run it locally.</p>
 
-  <p>Instead you're setting up a Vercel project. Or pushing to a branch for a preview deploy. Or telling someone to clone your repo and run it locally. Or sharing your screen on a call.</p>
+  <p>All of that just for <strong>"hey, check this out real quick"</strong>.</p>
 
-  <p>All of that for <strong>"hey, check this out real quick"</strong>.</p>
+  <p>sher fixes that. Run <code>sher link</code> in your project and you get a live URL you can send to anyone. It detects your framework (Vite, Next.js, Astro, plain HTML), builds it, uploads the output, and gives you a link. One command.</p>
 
-  <p>sher fixes that. Run <code>sher link</code> in your project. Get a URL. Send it. Done.</p>
-
-  <p>It detects your framework. Builds it. Uploads the output. Gives you a link. One command. Works with Vite, Next.js, Astro, plain HTML.</p>
-
-  <p>The link expires. No project to manage. No dashboard to check. No repo to configure.</p>
+  <p>The link expires on its own, so there's no project to manage, no dashboard to check, and nothing to clean up after.</p>
 
   <div class="cta">
     <code>npm i -g shersh</code>
