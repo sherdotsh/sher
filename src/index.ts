@@ -7,7 +7,7 @@ import { uploadFiles } from "./upload.js";
 import { copyToClipboard } from "./clipboard.js";
 import { getAuth, login, logout } from "./auth.js";
 import { listDeploys, deleteDeploy } from "./api.js";
-import { injectNextStaticExport, restoreConfig } from "./static-export.js";
+import { prepareNextStaticExport, restoreAll } from "./static-export.js";
 import { MAX_UPLOAD_SIZE, DEFAULT_TTL, VERSION } from "./constants.js";
 
 // -- Colors --
@@ -116,13 +116,15 @@ async function cmdLink(flags: Record<string, string | boolean>) {
 
     const pm = detectPackageManager(cwd);
     if (!flags["no-build"] && framework.name !== "static") {
-      // Auto-inject static export for Next.js if needed
-      let restoreExport: (() => void) | null = null;
+      // Auto-configure Next.js for static export
+      let prepResult: ReturnType<typeof prepareNextStaticExport> | null = null;
       if (framework.name === "Next.js") {
-        const result = injectNextStaticExport(cwd);
-        if (result) {
-          console.log(`  ${dim("config")}     injected output: "export" into ${result.configPath.split("/").pop()}`);
-          restoreExport = () => restoreConfig(result.configPath, result.original);
+        prepResult = prepareNextStaticExport(cwd);
+        if (prepResult.configInjected) {
+          console.log(`  ${dim("config")}     injected output: "export"`);
+        }
+        if (prepResult.metadataPatched.length > 0) {
+          console.log(`  ${dim("config")}     patched ${prepResult.metadataPatched.join(", ")} with force-static`);
         }
       }
 
@@ -130,7 +132,7 @@ async function cmdLink(flags: Record<string, string | boolean>) {
       try {
         runBuild(pm, cwd);
       } finally {
-        restoreExport?.();
+        if (prepResult) restoreAll(prepResult.backups);
       }
       console.log();
     }
