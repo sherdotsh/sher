@@ -67,7 +67,8 @@ export const LANDING_HTML = `<!DOCTYPE html>
 
   /* Header */
   .header{text-align:center;margin-bottom:2.5rem}
-  .logo{font-size:2.8rem;font-weight:700;letter-spacing:-.03em}
+  .logo{font-size:2.8rem;font-weight:700;letter-spacing:-.03em;display:inline-flex;align-items:baseline;gap:.5rem}
+  .beta{font-size:.65rem;color:#f97316;border:1px solid #f9731640;padding:1px 6px;border-radius:9999px;font-weight:500;letter-spacing:.03em;text-transform:uppercase;vertical-align:super}
   .tagline{color:#71717a;font-size:1.1rem;margin-top:.35rem;position:relative;display:inline-block}
   .aside{
     position:absolute;
@@ -223,7 +224,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
 <div class="main">
 
 <div class="header">
-  <div class="logo">sher</div>
+  <div class="logo">sher <span class="beta">beta</span></div>
   <div class="tagline">instant preview links for your projects<span class="aside">without Vercel</span></div>
 </div>
 

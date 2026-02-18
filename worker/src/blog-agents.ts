@@ -85,13 +85,22 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
   }
   .flow span{color:#a1a1aa}
   .cta{
-    margin-top:2.5rem;
-    padding-top:2rem;
-    border-top:1px solid #1a1a1e;
+    margin-top:1rem;
     display:flex;
     align-items:center;
     gap:12px;
   }
+  .code-block{
+    position:relative;
+  }
+  .code-block .copy-btn{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    padding:6px 10px;
+  }
+  .code-block pre{margin-bottom:0}
   .cta code{
     background:#18181b;
     border:1px solid #27272a;
@@ -150,7 +159,13 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
 
   <p>To make this easy to set up, we published an <a href="https://skills.sh">agent skill</a> that teaches your coding agent when and how to use <span class="brand">sher</span>. Install it with:</p>
 
-  <pre><code>npx skills add sherdotsh/sher</code></pre>
+  <div class="code-block">
+    <pre><code>npx skills add sherdotsh/sher</code></pre>
+    <button class="copy-btn" onclick="copyText(this,'npx skills add sherdotsh/sher')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy
+    </button>
+  </div>
 
   <p>It works with Claude Code, Cursor, Codex, OpenCode, and <a href="https://skills.sh">35+ other agents</a>. Once installed, your agent knows to run <code>sher link</code> after building a frontend project and pass the preview URL back to you.</p>
 
@@ -176,7 +191,7 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
 
   <div class="cta">
     <code>npm i -g shersh</code>
-    <button class="copy-btn" onclick="copyCmd(this)">
+    <button class="copy-btn" onclick="copyText(this,'npm i -g shersh')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       Copy
     </button>
@@ -186,24 +201,15 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
 
   <div class="cta">
     <code>npx skills add sherdotsh/sher</code>
-    <button class="copy-btn" onclick="copySkill(this)">
+    <button class="copy-btn" onclick="copyText(this,'npx skills add sherdotsh/sher')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       Copy
     </button>
   </div>
 </div>
 <script>
-function copyCmd(btn) {
-  navigator.clipboard.writeText('npm i -g shersh');
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
-  btn.classList.add('copied-btn');
-  setTimeout(() => {
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
-    btn.classList.remove('copied-btn');
-  }, 2000);
-}
-function copySkill(btn) {
-  navigator.clipboard.writeText('npx skills add sherdotsh/sher');
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text);
   btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
   btn.classList.add('copied-btn');
   setTimeout(() => {

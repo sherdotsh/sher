@@ -17,6 +17,7 @@ interface Env {
   POLAR_WEBHOOK_SECRET: string;
   POLAR_ACCESS_TOKEN: string;
   POLAR_PRO_PRODUCT_ID: string;
+  SLACK_WEBHOOK_URL: string;
 }
 
 // --- Tiers ---
@@ -641,6 +642,17 @@ async function handleAuthCallback(
   await env.KV.delete(`auth_state:${state}`);
 
   track(env, "login", [user.login, String(user.id)]);
+
+  // Notify Slack
+  if (env.SLACK_WEBHOOK_URL) {
+    fetch(env.SLACK_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: `New sher signup: *${user.login}* (GitHub ID: ${user.id})`,
+      }),
+    }).catch(() => {});
+  }
 
   // Redirect back to CLI's local server
   const callbackUrl = new URL(`http://localhost:${port}/callback`);

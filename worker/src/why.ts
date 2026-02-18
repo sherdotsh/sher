@@ -26,6 +26,7 @@ export const WHY_HTML = `<!DOCTYPE html>
   h1{font-size:1.8rem;font-weight:700;color:#fafafa;margin-bottom:1.5rem}
   p{color:#a1a1aa;margin-bottom:1.4rem;font-size:.95rem}
   p strong{color:#e4e4e7;font-weight:500}
+  .brand{color:#e4e4e7;font-weight:500}
   code{
     font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
     background:#18181b;
@@ -75,7 +76,7 @@ export const WHY_HTML = `<!DOCTYPE html>
 
   <p>All of that just for <strong>"hey, check this out real quick"</strong>.</p>
 
-  <p>sher fixes that. Run <code>sher link</code> in your project and you get a live URL you can send to anyone. It detects your framework (Vite, Next.js, Astro, plain HTML), builds it, uploads the output, and gives you a link. One command.</p>
+  <p><span class="brand">sher</span> fixes that. Run <code>sher link</code> in your project and you get a live URL you can send to anyone. It detects your framework (Vite, Next.js, Astro, plain HTML), builds it, uploads the output, and gives you a link. One command.</p>
 
   <p>The link expires on its own, so there's no project to manage, no dashboard to check, and nothing to clean up after.</p>
 
