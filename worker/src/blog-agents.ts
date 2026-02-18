@@ -10,9 +10,11 @@ export const BLOG_AGENTS_HTML = `<!DOCTYPE html>
 <meta property="og:description" content="AI agents can write code. Now they can deploy it too. One command. Live URL. No config.">
 <meta property="og:url" content="https://sher.sh/blog/agents">
 <meta property="og:type" content="article">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://api.microlink.io/?url=https%3A%2F%2Fsher.sh%2Fblog%2Fagents&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1200&viewport.height=630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Get your AI agents to build & deploy | sher">
 <meta name="twitter:description" content="AI agents can write code. Now they can deploy it too. One command. Live URL. No config.">
+<meta name="twitter:image" content="https://api.microlink.io/?url=https%3A%2F%2Fsher.sh%2Fblog%2Fagents&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1200&viewport.height=630">
 <link rel="canonical" href="https://sher.sh/blog/agents">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}

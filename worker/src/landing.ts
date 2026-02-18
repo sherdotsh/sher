@@ -10,9 +10,11 @@ export const LANDING_HTML = `<!DOCTYPE html>
 <meta property="og:description" content="One command. Get a URL. Send it. Works with Vite, Next.js, Astro, plain HTML.">
 <meta property="og:url" content="https://sher.sh">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://api.microlink.io/?url=https%3A%2F%2Fsher.sh&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1200&viewport.height=630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="sher | instant preview links for your projects">
 <meta name="twitter:description" content="One command. Get a URL. Send it. Works with Vite, Next.js, Astro, plain HTML.">
+<meta name="twitter:image" content="https://api.microlink.io/?url=https%3A%2F%2Fsher.sh&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1200&viewport.height=630">
 <link rel="canonical" href="https://sher.sh">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
