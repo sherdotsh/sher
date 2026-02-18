@@ -7,6 +7,7 @@ import { uploadFiles } from "./upload.js";
 import { copyToClipboard } from "./clipboard.js";
 import { getAuth, login, logout } from "./auth.js";
 import { listDeploys, deleteDeploy } from "./api.js";
+import { injectNextStaticExport, restoreConfig } from "./static-export.js";
 import { MAX_UPLOAD_SIZE, DEFAULT_TTL, VERSION } from "./constants.js";
 
 // -- Colors --
@@ -14,7 +15,6 @@ const bold = (s: string) => `\x1b[1m${s}\x1b[0m`;
 const green = (s: string) => `\x1b[32m${s}\x1b[0m`;
 const dim = (s: string) => `\x1b[2m${s}\x1b[0m`;
 const red = (s: string) => `\x1b[31m${s}\x1b[0m`;
-const yellow = (s: string) => `\x1b[33m${s}\x1b[0m`;
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes}B`;
@@ -114,15 +114,24 @@ async function cmdLink(flags: Record<string, string | boolean>) {
     const framework = detectFramework(cwd);
     console.log(`  ${dim("framework")}  ${framework.name}`);
 
-    if (framework.warning) {
-      console.error(`\n  ${red(framework.warning)}\n`);
-      process.exit(1);
-    }
-
     const pm = detectPackageManager(cwd);
     if (!flags["no-build"] && framework.name !== "static") {
+      // Auto-inject static export for Next.js if needed
+      let restoreExport: (() => void) | null = null;
+      if (framework.name === "Next.js") {
+        const result = injectNextStaticExport(cwd);
+        if (result) {
+          console.log(`  ${dim("config")}     injected output: "export" into ${result.configPath.split("/").pop()}`);
+          restoreExport = () => restoreConfig(result.configPath, result.original);
+        }
+      }
+
       console.log(`  ${dim("building")}   ${pm} run build\n`);
-      runBuild(pm, cwd);
+      try {
+        runBuild(pm, cwd);
+      } finally {
+        restoreExport?.();
+      }
       console.log();
     }
 

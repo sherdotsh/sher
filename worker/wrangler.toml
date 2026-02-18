@@ -2,6 +2,11 @@ name = "sher-worker"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
+routes = [
+  { pattern = "sher.sh/*", zone_name = "sher.sh" },
+  { pattern = "*.sher.sh/*", zone_name = "sher.sh" }
+]
+
 [triggers]
 crons = ["0 */6 * * *"]
 

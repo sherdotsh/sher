@@ -281,10 +281,17 @@ async function handleUpload(
     })
   );
 
+  // Build subdomain URL
+  const parsedOrigin = new URL(origin);
+  const deployUrl =
+    parsedOrigin.hostname === "localhost" || parsedOrigin.hostname === "127.0.0.1"
+      ? `${origin}/${id}`
+      : `${parsedOrigin.protocol}//${id}.${parsedOrigin.hostname}`;
+
   // Index deployment in KV for list/delete/cleanup
   const deployMeta = {
     id,
-    url: `${origin}/${id}`,
+    url: deployUrl,
     createdAt: new Date().toISOString(),
     expiresAt,
     fileCount: fileEntries.length,
@@ -307,8 +314,7 @@ async function handleUpload(
 
   await Promise.all(uploads);
 
-  const url = `${origin}/${id}`;
-  return Response.json({ url, id, expires: expiresAt });
+  return Response.json({ url: deployUrl, id, expires: expiresAt });
 }
 
 // --- Password form ---
@@ -332,7 +338,7 @@ button:hover{background:#e4e4e7}
 <body><div class="c">
 <h1>Protected preview</h1>
 <p>Enter the password to view this preview.</p>
-<form method="POST" action="/${id}/__unlock">
+<form method="POST" action="/__unlock">
 <input type="password" name="password" placeholder="Password" autofocus required>
 <button type="submit">View preview</button>
 ${error ? '<div class="err">Wrong password. Try again.</div>' : ""}
@@ -436,8 +442,8 @@ async function handleUnlock(
   return new Response(null, {
     status: 303,
     headers: {
-      Location: `/${id}/`,
-      "Set-Cookie": `sher_${id}=${hash}; Path=/${id}; Expires=${expires.toUTCString()}; HttpOnly; SameSite=Lax`,
+      Location: "/",
+      "Set-Cookie": `sher_${id}=${hash}; Path=/; Expires=${expires.toUTCString()}; HttpOnly; SameSite=Lax`,
     },
   });
 }
@@ -664,6 +670,27 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const origin = url.origin;
+    const hostname = url.hostname;
+
+    // Detect subdomain: abc12345.sher.sh (but not sher.sh itself or localhost)
+    const BASE_DOMAIN = "sher.sh";
+    const isSubdomain =
+      hostname.endsWith(`.${BASE_DOMAIN}`) && hostname !== BASE_DOMAIN;
+
+    // --- Subdomain: serve deployment files ---
+    if (isSubdomain) {
+      const id = hostname.split(".")[0];
+
+      // Password unlock on subdomain
+      if (path === "/__unlock" && request.method === "POST") {
+        return handleUnlock(request, env, id);
+      }
+
+      const filePath = path === "/" ? "" : path.replace(/^\//, "");
+      return handleServe(request, env, id, filePath);
+    }
+
+    // --- Main domain routes ---
 
     // CORS preflight
     if (request.method === "OPTIONS") {
@@ -711,24 +738,15 @@ export default {
       return handleAuthCallback(request, env);
     }
 
-    // Password unlock
-    const unlockMatch = path.match(/^\/([a-z0-9]{8})\/__unlock$/);
-    if (unlockMatch && request.method === "POST") {
-      return handleUnlock(request, env, unlockMatch[1]);
-    }
-
-    // Serve preview files
+    // Backward compat: redirect old path-based URLs to subdomain
     const match = path.match(/^\/([a-z0-9]{8})(\/.*)?$/);
     if (match) {
       const id = match[1];
-      const subpath = match[2];
-      // Redirect /:id (no trailing slash) to /:id/ so relative asset paths
-      // (e.g. ./assets/...) resolve under the deployment, not site root
-      if (subpath === undefined) {
-        return Response.redirect(`${origin}/${id}/`, 302);
-      }
-      const filePath = subpath.replace(/^\//, "");
-      return handleServe(request, env, id, filePath);
+      const rest = match[2] ?? "/";
+      return Response.redirect(
+        `${url.protocol}//${id}.${BASE_DOMAIN}${rest}`,
+        302
+      );
     }
 
     // Landing

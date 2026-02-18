@@ -4,22 +4,9 @@ import { join } from "node:path";
 export interface FrameworkInfo {
   name: string;
   outputDir: string;
-  warning?: string;
 }
 
 export type PackageManager = "bun" | "pnpm" | "yarn" | "npm";
-
-function detectNextExportConfig(cwd: string): boolean {
-  for (const name of ["next.config.js", "next.config.ts", "next.config.mjs"]) {
-    const configPath = join(cwd, name);
-    if (!existsSync(configPath)) continue;
-    try {
-      const content = readFileSync(configPath, "utf-8");
-      if (/output\s*:\s*["']export["']/.test(content)) return true;
-    } catch {}
-  }
-  return false;
-}
 
 export function detectFramework(cwd: string): FrameworkInfo {
   // Vite
@@ -37,14 +24,7 @@ export function detectFramework(cwd: string): FrameworkInfo {
     existsSync(join(cwd, "next.config.ts")) ||
     existsSync(join(cwd, "next.config.mjs"))
   ) {
-    const hasExport = detectNextExportConfig(cwd);
-    return {
-      name: "Next.js",
-      outputDir: "out",
-      warning: hasExport
-        ? undefined
-        : 'Next.js requires `output: "export"` in next.config for static hosting. See https://nextjs.org/docs/app/building-your-application/deploying/static-exports',
-    };
+    return { name: "Next.js", outputDir: "out" };
   }
 
   // Astro
