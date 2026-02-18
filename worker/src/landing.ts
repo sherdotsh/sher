@@ -6,18 +6,62 @@ export const LANDING_HTML = `<!DOCTYPE html>
 <title>sher — instant preview links for your projects</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="description" content="Instant preview links for your projects. No accounts, no config. Just sher link.">
+<meta property="og:title" content="sher — instant preview links for your projects">
+<meta property="og:description" content="One command. Get a URL. Send it. Works with Vite, Next.js, Astro, plain HTML.">
+<meta property="og:url" content="https://sher.sh">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="sher — instant preview links for your projects">
+<meta name="twitter:description" content="One command. Get a URL. Send it. Works with Vite, Next.js, Astro, plain HTML.">
+<link rel="canonical" href="https://sher.sh">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;overflow:hidden}
+  html{height:100%;overflow:hidden}
   body{
     font-family:system-ui,-apple-system,sans-serif;
     background:#09090b;
     color:#fafafa;
     display:flex;
     flex-direction:column;
+    height:100vh;
+  }
+
+  /* Banner */
+  .banner{
+    display:flex;
     align-items:center;
     justify-content:center;
-    height:100vh;
+    gap:8px;
+    padding:8px 16px;
+    background:#111113;
+    border-bottom:1px solid #27272a;
+    color:#a1a1aa;
+    font-size:.8rem;
+    text-decoration:none;
+    transition:background .15s,color .15s;
+    flex-shrink:0;
+  }
+  .banner:hover{background:#18181b;color:#fafafa}
+  .badge{
+    background:#22c55e20;
+    color:#22c55e;
+    padding:2px 8px;
+    border-radius:9999px;
+    font-size:.7rem;
+    font-weight:600;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+  }
+  .banner-arrow{color:#52525b;transition:color .15s}
+  .banner:hover .banner-arrow{color:#a1a1aa}
+
+  /* Main content */
+  .main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
     padding:1.5rem;
   }
 
@@ -163,10 +207,20 @@ export const LANDING_HTML = `<!DOCTYPE html>
     .header{margin-bottom:2rem}
     .install{margin-top:2rem}
     .footer{margin-top:1.5rem}
+    .badge{display:none}
+    .banner{font-size:.75rem;padding:7px 12px}
   }
 </style>
 </head>
 <body>
+
+<a href="/blog/agents" class="banner">
+  <span class="badge">New</span>
+  Get your AI agents to build &amp; deploy with sher
+  <span class="banner-arrow">&rarr;</span>
+</a>
+
+<div class="main">
 
 <div class="header">
   <div class="logo">sher</div>
@@ -197,11 +251,14 @@ export const LANDING_HTML = `<!DOCTYPE html>
     GitHub
   </a>
   <a href="https://github.com/sherdotsh/sher#readme" target="_blank">Docs</a>
+  <a href="/blog">Blog</a>
   <a href="/why">Why?</a>
   <a href="/pricing">Pricing</a>
   <a href="/terms">Terms</a>
   <a href="/privacy">Privacy</a>
 </div>
+
+</div><!-- .main -->
 
 <script>
 const term = document.getElementById('term');

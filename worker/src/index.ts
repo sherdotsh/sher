@@ -5,6 +5,8 @@ import { FAVICON_SVG } from "./favicon.js";
 import { WELCOME_HTML } from "./welcome.js";
 import { PRIVACY_HTML } from "./privacy.js";
 import { TERMS_HTML } from "./terms.js";
+import { BLOG_HTML } from "./blog.js";
+import { BLOG_AGENTS_HTML } from "./blog-agents.js";
 
 interface Env {
   BUCKET: R2Bucket;
@@ -1041,6 +1043,21 @@ export default {
       });
     }
 
+    // SEO
+    if (path === "/robots.txt") {
+      return new Response("User-agent: *\nAllow: /\nSitemap: https://sher.sh/sitemap.xml\n", {
+        headers: { "Content-Type": "text/plain" },
+      });
+    }
+    if (path === "/sitemap.xml") {
+      const pages = ["/", "/why", "/pricing", "/privacy", "/terms", "/blog", "/blog/agents"];
+      const urls = pages.map((p) => `<url><loc>https://sher.sh${p}</loc></url>`).join("");
+      return new Response(
+        `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`,
+        { headers: { "Content-Type": "application/xml" } }
+      );
+    }
+
     // Why page
     if (path === "/why") {
       track(env, "pageview", ["/why"]);
@@ -1073,6 +1090,20 @@ export default {
     }
     if (path === "/terms") {
       return new Response(TERMS_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Blog
+    if (path === "/blog") {
+      track(env, "pageview", ["/blog"]);
+      return new Response(BLOG_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+    if (path === "/blog/agents") {
+      track(env, "pageview", ["/blog/agents"]);
+      return new Response(BLOG_AGENTS_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }
