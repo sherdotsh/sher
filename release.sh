@@ -50,7 +50,7 @@ npm run build --silent
 
 # --- Deploy worker ---
 echo -e "  ${DIM}[3/6]${RESET} Deploying worker"
-(cd worker && npx wrangler deploy --quiet 2>&1)
+(cd worker && npx wrangler deploy 2>&1)
 
 # --- Commit + tag ---
 echo -e "  ${DIM}[4/6]${RESET} Committing v$VERSION"
