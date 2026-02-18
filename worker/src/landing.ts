@@ -168,6 +168,22 @@ export const LANDING_HTML = `<!DOCTYPE html>
   .copy-btn:hover{background:#3f3f46;color:#fafafa}
   .copy-btn.copied-btn{color:#22c55e;border-color:#22c55e40}
 
+  /* Try curl */
+  .try-curl{
+    margin-top:1rem;
+    font-size:.75rem;
+    color:#3f3f46;
+    cursor:pointer;
+    transition:color .15s;
+  }
+  .try-curl:hover{color:#52525b}
+  .try-curl code{
+    font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.7rem;
+    color:#52525b;
+  }
+  .try-curl.copied{color:#22c55e}
+
   /* Footer links */
   .footer{
     margin-top:2rem;
@@ -233,6 +249,8 @@ export const LANDING_HTML = `<!DOCTYPE html>
     Copy
   </button>
 </div>
+
+<div class="try-curl" onclick="copyCurl(this)">or try without installing: <code>sh &lt;(curl -fsSL sher.sh/run) link</code></div>
 
 <div class="footer">
   <a href="https://github.com/sherdotsh/sher" target="_blank">
@@ -340,6 +358,14 @@ function copyInstall(btn) {
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
     btn.classList.remove('copied-btn');
   }, 2000);
+}
+
+function copyCurl(el) {
+  navigator.clipboard.writeText('sh <(curl -fsSL sher.sh/run) link');
+  const orig = el.innerHTML;
+  el.textContent = 'copied!';
+  el.classList.add('copied');
+  setTimeout(() => { el.innerHTML = orig; el.classList.remove('copied'); }, 2000);
 }
 
 run();
