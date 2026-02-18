@@ -24,7 +24,6 @@ export const WHY_HTML = `<!DOCTYPE html>
   h1{font-size:1.8rem;font-weight:700;color:#fafafa;margin-bottom:1.5rem}
   p{color:#a1a1aa;margin-bottom:1.4rem;font-size:.95rem}
   p strong{color:#e4e4e7;font-weight:500}
-  .highlight{color:#fafafa}
   code{
     font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
     background:#18181b;
@@ -36,6 +35,9 @@ export const WHY_HTML = `<!DOCTYPE html>
     margin-top:2.5rem;
     padding-top:2rem;
     border-top:1px solid #1a1a1e;
+    display:flex;
+    align-items:center;
+    gap:12px;
   }
   .cta code{
     background:#18181b;
@@ -45,6 +47,21 @@ export const WHY_HTML = `<!DOCTYPE html>
     font-size:.9rem;
     color:#fafafa;
   }
+  .copy-btn{
+    background:#27272a;
+    border:1px solid #3f3f46;
+    color:#a1a1aa;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:.8rem;
+    transition:all .15s;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .copy-btn:hover{background:#3f3f46;color:#fafafa}
+  .copy-btn.copied-btn{color:#22c55e;border-color:#22c55e40}
 </style>
 </head>
 <body>
@@ -52,23 +69,36 @@ export const WHY_HTML = `<!DOCTYPE html>
   <a href="/" class="back">&larr; sher.sh</a>
   <h1>Why sher?</h1>
 
-  <p>AI agents are changing how we build. You can go from idea to working prototype in minutes. Cursor, Claude Code, Copilot, Windsurf, whatever you use. The building part has never been faster.</p>
+  <p>You built something. You want to show it to someone. Should be simple.</p>
 
-  <p>But then you want to show someone what you made.</p>
-
-  <p>And suddenly you're setting up a Vercel project, or pushing to a branch to trigger a preview deploy, or telling someone to clone your repo and run it locally, or sharing your screen on a call.</p>
+  <p>Instead you're setting up a Vercel project. Or pushing to a branch for a preview deploy. Or telling someone to clone your repo and run it locally. Or sharing your screen on a call.</p>
 
   <p>All of that for <strong>"hey, check this out real quick"</strong>.</p>
 
-  <p>That's what sher fixes. You're in your project, you run <code>sher link</code>, and you get a URL. Send it. Done. The link lives for a day and then disappears.</p>
+  <p>sher fixes that. Run <code>sher link</code> in your project. Get a URL. Send it. Done.</p>
 
-  <p>It works with whatever you're building. Vite, Next.js, Astro, plain HTML. It detects your framework, builds it, uploads the output, gives you the link. One command.</p>
+  <p>It detects your framework. Builds it. Uploads the output. Gives you a link. One command. Works with Vite, Next.js, Astro, plain HTML.</p>
 
-  <p>The iteration loop with AI is fast now. Sharing should be just as fast.</p>
+  <p>The link expires. No project to manage. No dashboard to check. No repo to configure.</p>
 
   <div class="cta">
     <code>npm i -g shersh</code>
+    <button class="copy-btn" onclick="copyCmd(this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy
+    </button>
   </div>
 </div>
+<script>
+function copyCmd(btn) {
+  navigator.clipboard.writeText('npm i -g shersh');
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+  btn.classList.add('copied-btn');
+  setTimeout(() => {
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+    btn.classList.remove('copied-btn');
+  }, 2000);
+}
+</script>
 </body>
 </html>`;

@@ -3,9 +3,9 @@ export const LANDING_HTML = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>sher — share your work</title>
+<title>sher — instant preview links for your projects</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<meta name="description" content="Share frontend project previews via ephemeral URLs. No accounts, no config. Just sher link.">
+<meta name="description" content="Instant preview links for your projects. No accounts, no config. Just sher link.">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%;overflow:hidden}
@@ -155,7 +155,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
 
 <div class="header">
   <div class="logo">sher</div>
-  <div class="tagline">share your work — instant preview links for frontend projects</div>
+  <div class="tagline">instant preview links for your projects</div>
 </div>
 
 <div class="terminal">
@@ -183,6 +183,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
   </a>
   <a href="https://github.com/sherdotsh/sher#readme" target="_blank">Docs</a>
   <a href="/why">Why?</a>
+  <a href="/pricing">Pricing</a>
 </div>
 
 <script>
@@ -197,7 +198,7 @@ const lines = [
   { type: 'info', html: '  <span class="label">files</span>      <span class="val">24 files</span> <span class="dim">(1.2MB)</span>' },
   { type: 'info', html: '  <span class="label">uploading</span>  <span class="val">...</span>' },
   { type: 'blank' },
-  { type: 'url', html: '  <span class="url">https://sher.sh/a8xk2m1p</span>  <span class="copied">(copied)</span>' },
+  { type: 'url', html: '  <span class="url">https://a8xk2m1p.sher.sh</span>  <span class="copied">(copied)</span>' },
   { type: 'expires', html: '  <span class="dim">expires 2/19/2026, 11:00 AM</span>' },
 ];
 

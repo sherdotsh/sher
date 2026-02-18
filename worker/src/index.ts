@@ -1,5 +1,6 @@
 import { LANDING_HTML } from "./landing.js";
 import { WHY_HTML } from "./why.js";
+import { PRICING_HTML } from "./pricing.js";
 import { FAVICON_SVG } from "./favicon.js";
 
 interface Env {
@@ -766,6 +767,13 @@ export default {
     // Why page
     if (path === "/why") {
       return new Response(WHY_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Pricing page
+    if (path === "/pricing") {
+      return new Response(PRICING_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }
