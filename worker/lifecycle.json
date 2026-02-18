@@ -1,0 +1,17 @@
+{
+  "rules": [
+    {
+      "id": "expire-previews",
+      "enabled": true,
+      "conditions": {
+        "prefix": "sites/"
+      },
+      "abort_multipart_uploads_transition": {
+        "days_after_initiation": 1
+      },
+      "expiration": {
+        "days": 7
+      }
+    }
+  ]
+}

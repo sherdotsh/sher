@@ -1,0 +1,35 @@
+{
+  "name": "sher",
+  "version": "0.1.0",
+  "description": "Share frontend project previews via ephemeral URLs",
+  "type": "module",
+  "bin": {
+    "sher": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "deploy",
+    "preview",
+    "share",
+    "static",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sherdotsh/sher"
+  },
+  "homepage": "https://sher.sh",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "@types/node": "^22.0.0"
+  }
+}
