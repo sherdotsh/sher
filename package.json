@@ -1,6 +1,6 @@
 {
   "name": "shersh",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Share frontend project previews via ephemeral URLs",
   "type": "module",
   "bin": {
