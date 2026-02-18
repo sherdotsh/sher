@@ -61,10 +61,10 @@ export const PRIVACY_HTML = `<!DOCTYPE html>
   </ul>
 
   <h2>Data deletion</h2>
-  <p>Run <code>sher logout</code> to remove your local credentials. Uploaded files are automatically deleted on expiry. To delete your account data, email us at hello@sher.sh.</p>
+  <p>Run <code>sher logout</code> to remove your local credentials. Uploaded files are automatically deleted on expiry. To delete your account data, email us at hi@sher.sh.</p>
 
   <h2>Contact</h2>
-  <p>Questions? Email <a href="mailto:hello@sher.sh">hello@sher.sh</a>.</p>
+  <p>Questions? Email <a href="mailto:hi@sher.sh">hi@sher.sh</a>.</p>
 </div>
 </body>
 </html>`;

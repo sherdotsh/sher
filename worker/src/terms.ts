@@ -36,7 +36,8 @@ export const TERMS_HTML = `<!DOCTYPE html>
   <p class="updated">Last updated: February 18, 2025</p>
 
   <h2>The service</h2>
-  <p>sher ("the service") is a tool for creating temporary preview links of frontend projects. It is provided by Ivan Cernja ("we", "us").</p>
+  <p>By accessing or using sher ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the Service.</p>
+  <p>sher is a tool for creating temporary preview links of frontend projects.</p>
 
   <h2>Acceptable use</h2>
   <p>You agree not to use sher to:</p>
@@ -63,7 +64,7 @@ export const TERMS_HTML = `<!DOCTYPE html>
   <p>We may update these terms. Continued use of the service after changes constitutes acceptance.</p>
 
   <h2>Contact</h2>
-  <p>Questions? Email <a href="mailto:hello@sher.sh">hello@sher.sh</a>.</p>
+  <p>Questions? Email <a href="mailto:hi@sher.sh">hi@sher.sh</a>.</p>
 </div>
 </body>
 </html>`;
