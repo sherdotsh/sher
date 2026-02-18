@@ -250,7 +250,7 @@ export const LANDING_HTML = `<!DOCTYPE html>
   </button>
 </div>
 
-<div class="try-curl" onclick="copyCurl(this)">or try without installing: <code>sh &lt;(curl -fsSL sher.sh/run) link</code></div>
+<div class="try-curl" onclick="copyCurl(this)">or try in your project without installing: <code>sh &lt;(curl -fsSL sher.sh/run) link</code></div>
 
 <div class="footer">
   <a href="https://github.com/sherdotsh/sher" target="_blank">
