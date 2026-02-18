@@ -2,6 +2,7 @@ import { LANDING_HTML } from "./landing.js";
 import { WHY_HTML } from "./why.js";
 import { PRICING_HTML } from "./pricing.js";
 import { FAVICON_SVG } from "./favicon.js";
+import { WELCOME_HTML } from "./welcome.js";
 
 interface Env {
   BUCKET: R2Bucket;
@@ -722,9 +723,9 @@ async function verifyWebhookSignature(
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - parseInt(timestamp, 10)) > 300) return false;
 
-  // Secret format: "whsec_<base64>" — strip the prefix
-  const rawSecret = secret.startsWith("whsec_") ? secret.slice(6) : secret;
-  const keyBytes = Uint8Array.from(atob(rawSecret), (c) => c.charCodeAt(0));
+  // Polar provides a raw string secret (polar_whs_...), not base64-encoded.
+  // Standard Webhooks expects base64-encoded, so we base64-encode first then decode.
+  const keyBytes = new TextEncoder().encode(secret);
 
   const key = await crypto.subtle.importKey(
     "raw",
@@ -751,50 +752,63 @@ async function handlePolarWebhook(
   request: Request,
   env: Env
 ): Promise<Response> {
-  const body = await request.text();
-
-  const valid = await verifyWebhookSignature(body, request.headers, env.POLAR_WEBHOOK_SECRET);
-  if (!valid) {
-    return errorResponse(403, "INVALID_SIGNATURE", "Webhook signature verification failed.");
-  }
-
-  let event: { type: string; data: Record<string, unknown> };
   try {
-    event = JSON.parse(body);
-  } catch {
-    return errorResponse(400, "INVALID_PAYLOAD", "Invalid JSON body.");
-  }
+    const body = await request.text();
 
-  const subscription = event.data as {
-    id?: string;
-    status?: string;
-    metadata?: Record<string, string>;
-  };
+    if (!env.POLAR_WEBHOOK_SECRET) {
+      return errorResponse(500, "CONFIG_ERROR", "Webhook secret not configured.");
+    }
 
-  const userId = subscription.metadata?.sher_user_id;
-  if (!userId) {
-    // No sher user linked — acknowledge but skip
+    const valid = await verifyWebhookSignature(body, request.headers, env.POLAR_WEBHOOK_SECRET);
+    if (!valid) {
+      return errorResponse(403, "INVALID_SIGNATURE", "Webhook signature verification failed.");
+    }
+
+    let event: { type: string; data: Record<string, unknown> };
+    try {
+      event = JSON.parse(body);
+    } catch {
+      return errorResponse(400, "INVALID_PAYLOAD", "Invalid JSON body.");
+    }
+
+    const subscription = event.data as {
+      id?: string;
+      status?: string;
+      metadata?: Record<string, string>;
+    };
+
+    const userId = subscription.metadata?.sher_user_id;
+    if (!userId) {
+      return new Response("OK", { status: 200 });
+    }
+
+    const polarSubId = subscription.id ?? "unknown";
+    const kvKey = `sub:${userId}`;
+
+    switch (event.type) {
+      case "subscription.created":
+      case "subscription.active":
+      case "subscription.uncanceled":
+        await env.KV.put(kvKey, JSON.stringify({ status: "active", polarSubId }));
+        break;
+      case "subscription.updated": {
+        const status = subscription.status === "canceled" ? "canceled" : "active";
+        await env.KV.put(kvKey, JSON.stringify({ status, polarSubId }));
+        break;
+      }
+      case "subscription.canceled":
+        await env.KV.put(kvKey, JSON.stringify({ status: "canceled", polarSubId }));
+        break;
+      case "subscription.revoked":
+        await env.KV.delete(kvKey);
+        break;
+    }
+
     return new Response("OK", { status: 200 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return errorResponse(500, "WEBHOOK_ERROR", `Webhook processing failed: ${message}`);
   }
-
-  const polarSubId = subscription.id ?? "unknown";
-  const kvKey = `sub:${userId}`;
-
-  switch (event.type) {
-    case "subscription.created":
-    case "subscription.active":
-    case "subscription.uncanceled":
-      await env.KV.put(kvKey, JSON.stringify({ status: "active", polarSubId }));
-      break;
-    case "subscription.canceled":
-      await env.KV.put(kvKey, JSON.stringify({ status: "canceled", polarSubId }));
-      break;
-    case "subscription.revoked":
-      await env.KV.delete(kvKey);
-      break;
-  }
-
-  return new Response("OK", { status: 200 });
 }
 
 // --- Checkout session creation ---
@@ -823,7 +837,7 @@ async function handleCreateCheckout(
         sher_user_id: auth.userId,
         sher_username: auth.username,
       },
-      success_url: "https://sher.sh/pricing?upgraded=1",
+      success_url: "https://sher.sh/welcome",
     }),
   });
 
@@ -989,6 +1003,13 @@ export default {
     // Pricing page
     if (path === "/pricing") {
       return new Response(PRICING_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Welcome page (post-checkout)
+    if (path === "/welcome") {
+      return new Response(WELCOME_HTML, {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }
