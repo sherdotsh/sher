@@ -572,7 +572,13 @@ export default {
     const match = path.match(/^\/([a-z0-9]{8})(\/.*)?$/);
     if (match) {
       const id = match[1];
-      const filePath = (match[2] ?? "/").replace(/^\//, "");
+      const subpath = match[2];
+      // Redirect /:id (no trailing slash) to /:id/ so relative asset paths
+      // (e.g. ./assets/...) resolve under the deployment, not site root
+      if (subpath === undefined) {
+        return Response.redirect(`${origin}/${id}/`, 302);
+      }
+      const filePath = subpath.replace(/^\//, "");
       return handleServe(request, env, id, filePath);
     }
 
