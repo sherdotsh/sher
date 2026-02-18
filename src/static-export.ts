@@ -40,27 +40,42 @@ export function prepareNextStaticExport(cwd: string): PrepareResult {
   const backups: FileBackup[] = [];
   let configInjected = false;
 
-  // 1. Inject output: "export" into next.config
+  // 1. Inject output: "export" and images: { unoptimized: true } into next.config
   for (const name of NEXT_CONFIG_FILES) {
     const configPath = join(cwd, name);
     if (!existsSync(configPath)) continue;
 
     const original = readFileSync(configPath, "utf-8");
+    let modified = original;
 
-    if (/output\s*:\s*["']export["']/.test(original)) break;
+    // Inject output: "export"
+    if (!/output\s*:\s*["']export["']/.test(modified)) {
+      if (/output\s*:\s*["'][^"']*["']/.test(modified)) {
+        modified = modified.replace(
+          /output\s*:\s*["'][^"']*["']/,
+          'output: "export"'
+        );
+      } else {
+        modified = modified.replace(
+          /((?:export\s+default|module\.exports\s*=|=)\s*\{)/,
+          '$1\n  output: "export",'
+        );
+      }
+    }
 
-    let modified: string;
-
-    if (/output\s*:\s*["'][^"']*["']/.test(original)) {
-      modified = original.replace(
-        /output\s*:\s*["'][^"']*["']/,
-        'output: "export"'
-      );
-    } else {
-      modified = original.replace(
-        /((?:export\s+default|module\.exports\s*=|=)\s*\{)/,
-        '$1\n  output: "export",'
-      );
+    // Inject images: { unoptimized: true } (needed for static export)
+    if (!/unoptimized\s*:\s*true/.test(modified)) {
+      if (/images\s*:\s*\{/.test(modified)) {
+        modified = modified.replace(
+          /(images\s*:\s*\{)/,
+          "$1 unoptimized: true,"
+        );
+      } else {
+        modified = modified.replace(
+          /((?:export\s+default|module\.exports\s*=|=)\s*\{)/,
+          '$1\n  images: { unoptimized: true },'
+        );
+      }
     }
 
     if (modified !== original) {
