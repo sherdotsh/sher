@@ -1060,6 +1060,17 @@ export default {
       return res;
     }
 
+    // Current user info
+    if (path === "/api/me" && request.method === "GET") {
+      const auth = await resolveAuth(env, request);
+      if (!auth.authenticated) {
+        return Response.json({ error: { message: "Unauthorized" } }, { status: 401 });
+      }
+      const res = Response.json({ username: auth.username, userId: auth.userId, tier: auth.tier });
+      res.headers.set("Access-Control-Allow-Origin", "*");
+      return res;
+    }
+
     // Health check
     if (path === "/api/health") {
       return Response.json({ status: "ok" });
