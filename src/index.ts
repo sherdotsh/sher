@@ -230,7 +230,6 @@ async function cmdLogin() {
   }
 
   console.log(`\n  ${bold("sher")} ${dim("— login with GitHub")}\n`);
-  console.log(`  ${dim("Opening browser...")}\n`);
 
   const auth = await login();
   console.log(`  ${green("Logged in")} as ${bold(auth.username)}\n`);

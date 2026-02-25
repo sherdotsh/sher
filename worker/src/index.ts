@@ -112,6 +112,17 @@ function track(
   }
 }
 
+const SIMPLE_ANALYTICS = `<script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script><noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif?collect-dnt=true" alt="" referrerpolicy="no-referrer-when-downgrade"/></noscript>`;
+
+function htmlPage(html: string): Response {
+  const injected = html.includes("</body>")
+    ? html.replace("</body>", `${SIMPLE_ANALYTICS}</body>`)
+    : html;
+  return new Response(injected, {
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  });
+}
+
 // --- Auth ---
 interface UserData {
   userId: string;
@@ -267,7 +278,9 @@ async function handleUpload(
     );
   }
 
-  const fileEntries = Object.entries(payload.files);
+  const fileEntries = Object.entries(payload.files).filter(
+    ([path]) => !path.split("/").some((seg) => seg === "__meta__.json")
+  );
 
   if (fileEntries.length === 0) {
     return errorResponse(400, "INVALID_PAYLOAD", "No files provided.");
@@ -401,7 +414,7 @@ async function handleUpload(
   await Promise.all(uploads);
 
   const cliVersion = request.headers.get("X-Sher-Version") ?? "unknown";
-  track(env, "upload", [auth.tier, cliVersion, passwordHash ? "password" : "public"], [fileEntries.length, totalDecodedSize]);
+  track(env, "upload", [auth.tier, cliVersion, passwordHash ? "password" : "public", id, auth.username ?? "anon", auth.userId ?? ""], [fileEntries.length, totalDecodedSize]);
 
   return Response.json({ url: deployUrl, id, expires: expiresAt });
 }
@@ -526,6 +539,12 @@ async function handleUnlock(
   env: Env,
   id: string
 ): Promise<Response> {
+  const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
+  const rateCheck = await checkRateLimit(env, `unlock:${id}:${ip}`, 10);
+  if (!rateCheck.allowed) {
+    return new Response("Too many attempts. Try again tomorrow.", { status: 429 });
+  }
+
   const prefix = `sites/${id}`;
 
   const metaObj = await env.BUCKET.get(`${prefix}/__meta__.json`);
@@ -558,7 +577,7 @@ async function handleUnlock(
     status: 303,
     headers: {
       Location: "/",
-      "Set-Cookie": `sher_${id}=${hash}; Path=/; Expires=${expires.toUTCString()}; HttpOnly; SameSite=Lax`,
+      "Set-Cookie": `sher_${id}=${hash}; Path=/; Expires=${expires.toUTCString()}; HttpOnly; SameSite=Lax; Secure`,
     },
   });
 }
@@ -574,6 +593,11 @@ async function handleAuthStart(
 
   if (!state || !port) {
     return new Response("Missing state or port", { status: 400 });
+  }
+
+  const portNum = parseInt(port, 10);
+  if (isNaN(portNum) || portNum < 1024 || portNum > 65535 || String(portNum) !== port) {
+    return new Response("Invalid port", { status: 400 });
   }
 
   await env.KV.put(`auth_state:${state}`, port, { expirationTtl: 300 });
@@ -1060,6 +1084,17 @@ export default {
       return res;
     }
 
+    // Current user info
+    if (path === "/api/me" && request.method === "GET") {
+      const auth = await resolveAuth(env, request);
+      if (!auth.authenticated) {
+        return Response.json({ error: { message: "Unauthorized" } }, { status: 401 });
+      }
+      const res = Response.json({ username: auth.username, userId: auth.userId, tier: auth.tier });
+      res.headers.set("Access-Control-Allow-Origin", "*");
+      return res;
+    }
+
     // Health check
     if (path === "/api/health") {
       return Response.json({ status: "ok" });
@@ -1087,9 +1122,7 @@ export default {
     // Landing
     if (path === "/") {
       track(env, "pageview", ["/"]);
-      return new Response(LANDING_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(LANDING_HTML);
     }
 
     // Favicon
@@ -1140,111 +1173,77 @@ fi
     // Why page
     if (path === "/why") {
       track(env, "pageview", ["/why"]);
-      return new Response(WHY_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(WHY_HTML);
     }
 
     // Pricing page
     if (path === "/pricing") {
       track(env, "pageview", ["/pricing"]);
-      return new Response(PRICING_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(PRICING_HTML);
     }
 
     // Welcome page (post-checkout)
     if (path === "/welcome") {
       track(env, "pageview", ["/welcome"]);
-      return new Response(WELCOME_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(WELCOME_HTML);
     }
 
     // Legal
     if (path === "/privacy") {
-      return new Response(PRIVACY_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(PRIVACY_HTML);
     }
     if (path === "/terms") {
-      return new Response(TERMS_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(TERMS_HTML);
     }
 
     // Blog
     if (path === "/blog") {
       track(env, "pageview", ["/blog"]);
-      return new Response(BLOG_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_HTML);
     }
     if (path === "/blog/agents") {
       track(env, "pageview", ["/blog/agents"]);
-      return new Response(BLOG_AGENTS_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_AGENTS_HTML);
     }
     if (path === "/blog/share-localhost") {
       track(env, "pageview", ["/blog/share-localhost"]);
-      return new Response(BLOG_SHARE_LOCALHOST_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_SHARE_LOCALHOST_HTML);
     }
     if (path === "/blog/without-vercel") {
       track(env, "pageview", ["/blog/without-vercel"]);
-      return new Response(BLOG_WITHOUT_VERCEL_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_WITHOUT_VERCEL_HTML);
     }
     if (path === "/blog/ai-agent-deploy") {
       track(env, "pageview", ["/blog/ai-agent-deploy"]);
-      return new Response(BLOG_AI_AGENT_DEPLOY_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_AI_AGENT_DEPLOY_HTML);
     }
     if (path === "/blog/fastest-preview-url") {
       track(env, "pageview", ["/blog/fastest-preview-url"]);
-      return new Response(BLOG_FASTEST_PREVIEW_URL_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_FASTEST_PREVIEW_URL_HTML);
     }
     if (path === "/blog/surge-vs-vercel-vs-sher") {
       track(env, "pageview", ["/blog/surge-vs-vercel-vs-sher"]);
-      return new Response(BLOG_SURGE_VS_VERCEL_VS_SHER_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_SURGE_VS_VERCEL_VS_SHER_HTML);
     }
     if (path === "/blog/claude-code-deploy") {
       track(env, "pageview", ["/blog/claude-code-deploy"]);
-      return new Response(BLOG_CLAUDE_CODE_DEPLOY_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_CLAUDE_CODE_DEPLOY_HTML);
     }
     if (path === "/blog/agent-deploy-step") {
       track(env, "pageview", ["/blog/agent-deploy-step"]);
-      return new Response(BLOG_AGENT_DEPLOY_STEP_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_AGENT_DEPLOY_STEP_HTML);
     }
     if (path === "/blog/share-nextjs") {
       track(env, "pageview", ["/blog/share-nextjs"]);
-      return new Response(BLOG_SHARE_NEXTJS_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_SHARE_NEXTJS_HTML);
     }
     if (path === "/blog/replace-vercel-previews") {
       track(env, "pageview", ["/blog/replace-vercel-previews"]);
-      return new Response(BLOG_REPLACE_VERCEL_PREVIEWS_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_REPLACE_VERCEL_PREVIEWS_HTML);
     }
     if (path === "/blog/openclaw-deploy") {
       track(env, "pageview", ["/blog/openclaw-deploy"]);
-      return new Response(BLOG_OPENCLAW_DEPLOY_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      });
+      return htmlPage(BLOG_OPENCLAW_DEPLOY_HTML);
     }
 
     return new Response("Not found", { status: 404 });
