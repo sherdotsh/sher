@@ -65,6 +65,25 @@ export async function createCheckout(): Promise<{ url: string }> {
   return (await res.json()) as { url: string };
 }
 
+export async function cancelSubscription(): Promise<{ status: string }> {
+  const auth = getAuth();
+  if (!auth) throw new Error("Login required. Run `sher login` first.");
+
+  const res = await fetch(`${API_URL}/api/subscription/cancel`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${auth.token}`, "X-Sher-Version": VERSION },
+  });
+
+  if (!res.ok) {
+    const data = (await res.json().catch(() => null)) as {
+      error?: { message?: string };
+    } | null;
+    throw new Error(data?.error?.message ?? `Cancellation failed (${res.status})`);
+  }
+
+  return (await res.json()) as { status: string };
+}
+
 interface PreflightResult {
   allowed: boolean;
   used: number;
