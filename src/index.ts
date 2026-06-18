@@ -1,12 +1,13 @@
 import { resolve } from "node:path";
 import { randomBytes } from "node:crypto";
+import { createInterface } from "node:readline";
 import { detectFramework, detectPackageManager } from "./detect.js";
 import { runBuild } from "./build.js";
 import { collectFiles } from "./collect.js";
 import { uploadFiles } from "./upload.js";
 import { copyToClipboard } from "./clipboard.js";
 import { getAuth, login, logout, openBrowser } from "./auth.js";
-import { listDeploys, deleteDeploy, createCheckout, getSubscription, checkPreflight } from "./api.js";
+import { listDeploys, deleteDeploy, createCheckout, getSubscription, cancelSubscription, checkPreflight } from "./api.js";
 import { prepareNextStaticExport, restoreAll } from "./static-export.js";
 import { MAX_UPLOAD_SIZE, DEFAULT_TTL, VERSION } from "./constants.js";
 
@@ -38,6 +39,7 @@ const HELP = `
     list                    Show your active deployments
     delete <id>             Delete a deployment
     upgrade                 Upgrade to Pro ($8/mo)
+    cancel                  Cancel your Pro subscription
     login                   Authenticate with GitHub
     logout                  Remove stored credentials
     whoami                  Show current login status and tier
@@ -324,6 +326,41 @@ async function cmdUpgrade() {
   console.log(`  ${bold(url)}\n`);
 }
 
+function confirm(question: string): Promise<boolean> {
+  return new Promise((res) => {
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    rl.question(question, (answer) => {
+      rl.close();
+      res(/^y(es)?$/i.test(answer.trim()));
+    });
+  });
+}
+
+async function cmdCancel() {
+  const auth = getAuth();
+  if (!auth) {
+    console.error(`\n  ${red("Login required.")} Run ${dim("`sher login`")} first.\n`);
+    process.exit(1);
+  }
+
+  const { tier, subscription } = await getSubscription();
+  if (tier !== "pro" || !subscription || subscription.status !== "active") {
+    console.log(`\n  ${dim("You don't have an active Pro subscription to cancel.")}\n`);
+    return;
+  }
+
+  console.log(`\n  ${bold("sher")} ${dim("— cancel Pro")}\n`);
+  const ok = await confirm(`  Cancel your Pro subscription? ${dim("(y/N)")} `);
+  if (!ok) {
+    console.log(`\n  ${dim("No changes made.")}\n`);
+    return;
+  }
+
+  await cancelSubscription();
+  console.log(`\n  ${green("Subscription canceled.")} ${dim("You keep Pro until the end of the current billing period.")}`);
+  console.log(`  ${dim("Changed your mind? Run")} ${bold("sher upgrade")} ${dim("to resubscribe.")}\n`);
+}
+
 // -- Main --
 async function main() {
   const { command, positional, flags } = parseArgs();
@@ -352,6 +389,9 @@ async function main() {
       break;
     case "upgrade":
       await cmdUpgrade();
+      break;
+    case "cancel":
+      await cmdCancel();
       break;
     case "login":
       await cmdLogin();

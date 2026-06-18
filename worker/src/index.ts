@@ -978,6 +978,50 @@ async function handleSubscriptionStatus(
   });
 }
 
+// --- Subscription cancellation ---
+async function handleCancelSubscription(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  const auth = await resolveAuth(env, request);
+  if (!auth.authenticated || !auth.userId) {
+    return errorResponse(401, "UNAUTHENTICATED", "Login required. Run `sher login` first.");
+  }
+
+  const sub = await env.KV.get<SubData>(`sub:${auth.userId}`, "json");
+  if (!sub || sub.status !== "active") {
+    return errorResponse(
+      400,
+      "NO_ACTIVE_SUBSCRIPTION",
+      "You don't have an active subscription to cancel."
+    );
+  }
+
+  // Cancel at period end so Pro access continues until the current period ends.
+  const res = await fetch(`https://api.polar.sh/v1/subscriptions/${sub.polarSubId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${env.POLAR_ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ cancel_at_period_end: true }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    return errorResponse(502, "POLAR_ERROR", `Failed to cancel subscription: ${err}`);
+  }
+
+  // Reflect the cancellation immediately; the Polar webhook will confirm.
+  await env.KV.put(
+    `sub:${auth.userId}`,
+    JSON.stringify({ status: "canceled", polarSubId: sub.polarSubId })
+  );
+  track(env, "subscription_canceled", [auth.userId]);
+
+  return Response.json({ status: "canceled" });
+}
+
 // --- Main router ---
 export default {
   async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
@@ -1058,6 +1102,13 @@ export default {
     // Subscription status
     if (path === "/api/subscription" && request.method === "GET") {
       const res = await handleSubscriptionStatus(request, env);
+      res.headers.set("Access-Control-Allow-Origin", "*");
+      return res;
+    }
+
+    // Cancel subscription
+    if (path === "/api/subscription/cancel" && request.method === "POST") {
+      const res = await handleCancelSubscription(request, env);
       res.headers.set("Access-Control-Allow-Origin", "*");
       return res;
     }
