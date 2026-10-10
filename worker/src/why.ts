@@ -87,6 +87,7 @@ export const WHY_HTML = `<!DOCTYPE html>
       Copy
     </button>
   </div>
+  <p style="margin-top:2.5rem;font-size:.85rem;color:#71717a">Need a video of what you built, not just a link? <a href="https://tryteasr.com" style="color:inherit">Teasr</a> turns a website into a product video, from the same maker.</p>
 </div>
 <script>
 function copyCmd(btn) {
