@@ -17,6 +17,7 @@ import { BLOG_AGENT_DEPLOY_STEP_HTML } from "./blog-agent-deploy-step.js";
 import { BLOG_SHARE_NEXTJS_HTML } from "./blog-share-nextjs.js";
 import { BLOG_REPLACE_VERCEL_PREVIEWS_HTML } from "./blog-replace-vercel-previews.js";
 import { BLOG_OPENCLAW_DEPLOY_HTML } from "./blog-openclaw-deploy.js";
+import { TIERS, type TierName } from "./pricing-model.js";
 
 interface Env {
   BUCKET: R2Bucket;
@@ -31,13 +32,8 @@ interface Env {
 }
 
 // --- Tiers ---
-const TIERS = {
-  anon: { maxUploads: 1, maxSizeBytes: 10 * 1024 * 1024, maxTTLHours: 6, canPassword: false },
-  auth: { maxUploads: 25, maxSizeBytes: 50 * 1024 * 1024, maxTTLHours: 24, canPassword: false },
-  pro: { maxUploads: 200, maxSizeBytes: 100 * 1024 * 1024, maxTTLHours: 168, canPassword: true },
-};
-
-type TierName = keyof typeof TIERS;
+// TIERS and TierName now come from pricing-model.ts (the single source of
+// truth), guarded in CI by `tender check`.
 
 // --- MIME types ---
 const MIME_TYPES: Record<string, string> = {
